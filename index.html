@@ -1786,6 +1786,12 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 					<br>
 					<li><em><strong>Greatword</strong>: </em>A powerful, but heavy weapon. This weapon was made for devastation, but makes the warrior's severely slower than others. They cost $360 to buy in shops.</li>
 					<br>
+					<li><em><strong>Gauntlets</strong>: </em>The gauntlets are modified gloves with armored plating, allowing Warriors, especially of the Berserker Attribute, to go ham in close combat. They cost $320 to buy in shops.</li>
+					<br>
+					<li><em><strong>Warhammer</strong>: </em>The warhammer is by far the most heavy, and devastating weapon built by mankind. A two-handed weapon that, with a single swing, can take out multiple enemies at once! They cost $500 to buy in shops.</li>
+					<br>
+					<li><em><strong>Shield</strong>: </em>The shield is a must-have on a Warrior's arsenal, allowing Warriors to block, defend, protect, or bash their way through foes. They cost $400 to buy in shops.</li>
+					<br>
 					<li><em><strong>Wand</strong>: </em>The wand is essential to a magic-type warrior, as it helps them focus their Magic into one spot, allowing for deadly spells to blow away foes. They cost $320 to buy in shops.</li>
 					<br>
 					<li><em><strong>Staff</strong>: </em>The staff is a powerful weapon, as it is just a wand, but exceptionally more powerful. In exchange for less mobility, warriors can become living cannons of magic with this weapon. They cost $360 to buy in shops.</li>
@@ -1809,6 +1815,8 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 					<li><em><strong>Scarf</strong>: </em>The scarf may seem like a simple cosmetic to you, but it actually has a special enchantment to help warriors be more agile in battle. They cost $300 to buy in shops.</li>
 					<br>
 					<li><em><strong>Glasses</strong>: </em>Ah yes, glasses, to help those with visual impairments see better, and to help warriors NEVER MISS ATTACKS. They cost $320 to buy in shops.</li>
+					<br>
+					<li><em><strong>Ring</strong>: </em>The ring, a famous piece of jewelry used in proposals, weddings, flexing, and for good luck! They cost $500 to buy in shops.</li>
 					<br>
 					<li><em><strong>Sharpener</strong>: </em>Sharpeners are not what you think. You might think they're for pencils, but these sharpeners are meant to sharpen your weapons and land critical attacks much easier. They cost $360 to buy in shops.</li>
 					<br>
@@ -1988,7 +1996,11 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 			<br>
 			<li><em><strong>Freeze</strong>: </em>This Innate is yet another simple one, similar to the Fireball Innate. Warriors conjure up extremely cold, powerful winds that can freeze anything to its core.</li>
 			<br>
+			<li><em><strong>Thunderbolt</strong>: </em>This Innate is also another one like the Freeze, and Fireball Innate, completing the elemental trio, allowing Warriors to summon straight up lightning bolts from the sky to strike down foes and shock survivors.</li>
+			<br>
 			<li><em><strong>Acid Spit</strong>: </em>This Innate is, yet again, very simple. It allows warriors to, well, have highly acidic and poisonous spit, allowing them to melt through anything.</li>
+			<br>
+			<li><em><strong>Mesmerizing Voice</strong>: </em>This Innate is more like an Attribute, allowing people to have amazing voices, with main users of this Innate actually being entertainers instead of warriors, but is classified as an Innate due to it's special ability to manipulate its hearers to do what the user wants.</li>
 			<br>
 			<li><em><strong>Hunt</strong>: </em>This Innate is usually used by Hunter-type people, hence why it's called Hunt, as with a single Hunt, you can deal massive, critical damage to an enemy, and weaken them.</li>
 			<br>
@@ -2935,6 +2947,9 @@ let lastClickTime = 0;
 document.addEventListener(
   "click",
   (event) => {
+	if (event.target.closest("#guildMenu")) {
+      return;
+    }
     const currentTime = Date.now();
 
     // Check if 1 second (1000 ms) has passed since the last accepted click.
@@ -2998,7 +3013,7 @@ document.addEventListener(
   "Even Further Beyond": { audio: new Audio("roadtotheend.mp3"), savedTime: 0 },
   "Realm Of The Gods": { audio: new Audio("bossmusic.mp3"), savedTime: 0 },
 };
-const titleMusicOptions = ["gojira.mp3"];
+const titleMusicOptions = ["fire.mp3", "tokyo.mp3", "hero.mp3", "special.mp3", "bang.mp3", "level.mp3", "titan.mp3", "rumbling.mp3"];
 const titleIndex = Math.floor(Math.random() * titleMusicOptions.length);
 const titleMusic = new Audio(titleMusicOptions[titleIndex]);
 titleMusic.loop = true;
@@ -3071,8 +3086,8 @@ casinoMusic.loop = true;
   attack:    5,
   defense:   5,
   magic:     3,
-  maxHp:    200,
-  hp:       200,
+  maxHp:    100,
+  hp:       100,
   maxArmor: 20,
   armor: 20,
   maxMana:  10,
@@ -3085,7 +3100,7 @@ casinoMusic.loop = true;
   dodgeChance: 0.2,
   neverMiss: false,
   critMultiplier: 1,
-  money: 10,
+  money: 1000,
   exp: 0,
   level: 1,
   expToLevel: 5,
@@ -3104,7 +3119,7 @@ casinoMusic.loop = true;
     attack:    5,
     defense:   5,
     magic:     3,
-    maxHp:    200,
+    maxHp:    100,
 	maxArmor: 20,
     maxMana:  10,
     agility:   1,
@@ -3143,6 +3158,12 @@ casinoMusic.loop = true;
     p.defense = Math.ceil(p.defense * 1.5);
 	p.maxArmor += 10;
     p.agility = p.agility - 10;
+  },
+  "Warhammer": p => {
+    p.attack = p.attack * 3;
+    p.defense = Math.ceil(p.defense * 1.67);
+	p.maxArmor += 15;
+    p.agility = p.agility - 15;
   },
   "Dagger":     p => {
     p.attack = Math.ceil(p.attack * 1.33);
@@ -3399,6 +3420,7 @@ const weaponSkillMap = {
   "Dagger": "Assassinate",
   "Shield": "Bash",
   "Greatsword": "Heavy Slash",
+  "Warhammer": "Smash",
   "Staff": "Blast Minima",
   "Excalibur": "Execution",
   "Sorceress' Staff": "Rewind",
@@ -5611,6 +5633,16 @@ let shopItemsList = [
 	description: "Heavy, but powerful, allowing you to land devastating strikes from all around.",
   },
   {
+    name: "Warhammer",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "Extremely heavy, but very powerful, allowing you to smash foes to bits.",
+  },
+  {
     name: "Spear",
     cost: 360,
     type: "equipment",
@@ -6040,7 +6072,7 @@ applyPassiveAbilityEffects();
 
 player.guildUnlocked     = true;
 player.guildMissionStage = 7;
-player.guildMissionKills = getCurrentMissionRequirement();
+player.guildMissionKills = 0;
 updateGuildRankUI();
 updateStats();
 updateManaDisplay();
@@ -6059,7 +6091,7 @@ updateManaDisplay();
  magicBtn.innerText = "Spell";
 player.guildUnlocked     = false;
 player.guildMissionStage = 0;
-player.guildMissionKills = getCurrentMissionRequirement();
+player.guildMissionKills = 0;
  document.getElementById("abilityMenu").style.display   = "block";
 }
 
@@ -6219,8 +6251,15 @@ function handleTitleScreenClick() {
   titleMusic.play().catch((e) => {
 	console.log("Title music playback prevented:", e);
   });
-  const src = titleMusic.src;
-  if (src.includes("gojira.mp3")) titleBox.classList.add("jump-zoom-gojira");
+  const src = titleMusic.src;  
+  if (src.includes("fire.mp3")) titleBox.classList.add("jump-zoom-fire");
+  if (src.includes("tokyo.mp3")) titleBox.classList.add("jump-zoom-tokyo");
+  if (src.includes("hero.mp3")) titleBox.classList.add("jump-zoom-hero");
+  if (src.includes("special.mp3")) titleBox.classList.add("jump-zoom-special");
+  if (src.includes("bang.mp3")) titleBox.classList.add("jump-zoom-bang");
+  if (src.includes("level.mp3")) titleBox.classList.add("jump-zoom-level");
+  if (src.includes("titan.mp3")) titleBox.classList.add("jump-zoom-titan");
+  if (src.includes("rumbling.mp3")) titleBox.classList.add("jump-zoom-rumbling");
   playButton.style.display = "block";
   titleScreen.removeEventListener("click", handleTitleScreenClick);
 }
@@ -7199,7 +7238,7 @@ if (gameDifficulty !== "doom") {
   map[key].element.innerHTML = '<div class="player"></div>';
   centerCamera();
   
-  if ((gameDifficulty === "normal" || gameDifficulty === "hard") && ![ ROOM_TYPES.BATTLE, ROOM_TYPES.AMBUSH, ROOM_TYPES.BOSS, ROOM_TYPES.WARRIOR ].includes(map[key].type)) {
+  if ((gameDifficulty === "normal" || gameDifficulty === "hard") && ![ ROOM_TYPES.BATTLE, ROOM_TYPES.AMBUSH, ROOM_TYPES.BOSS, ROOM_TYPES.WARRIOR, ROOM_TYPES.SHOP, ROOM_TYPES.CASINO, ROOM_TYPES.ALTAR,  ].includes(map[key].type)) {
 	player.exp += 1;
 	if (player.exp >= player.expToLevel) {
 		levelUp();
@@ -7326,7 +7365,12 @@ function finalizeRoom(key) {
        * GUILD SHIT
        *******************/
 	  
-	  function showGuildApplicationPrompt() {
+function showGuildApplicationPrompt() {
+  if (player.money < 500) {
+	alert("You do not have the requirement to apply, please return when you do.");
+    return;
+  }
+  
   let input = prompt("Welcome to the Guild! Please pay $500 if you wish to apply!");
   // If the player cancels or inputs nothing, assume they’re choosing to leave.
   if (input === null) {
@@ -7334,15 +7378,17 @@ function finalizeRoom(key) {
     return;
   }
   let amount = Number(input);
-  if (amount < 500) {
-    alert("You do not have the requirement to apply, please return when you do.");
-    return;
+  if (isNaN(amount) || amount < 500) {
+     alert("Please input the right amount of money.");
+	 return;
   }
-  // Deduct the fee and mark the guild as unlocked.
-  player.money -= 500;
-  alert("Thank you for applying. Welcome to the Guild!");
-  player.guildUnlocked = true;
-  showGuildMainMenu();
+  
+  if (amount >= 500) {
+	player.money -= 500;
+	alert("Thank you for applying. Welcome to the Guild!");
+	player.guildUnlocked = true;
+	showGuildMainMenu();
+  }
 }
 
 function getGuildRank() {
@@ -7385,25 +7431,23 @@ function showGuildMainMenu() {
   const guildMenu = document.getElementById("guildMenu");
   updateGuildRankUI();
 
-  const missionBtn = document.getElementById("missionButton");
   const hireMercenaryBtn = document.getElementById("hireMercenaryButton");
   const closeBtn = document.getElementById("closeGuildMenu");
 
   // Remove any existing event listeners by reassigning the onclick properties
-  missionBtn.onclick = handleMission;
+  document.getElementById("missionButton").onclick = handleMission;
   hireMercenaryBtn.onclick = handleHireMercenary;
   closeBtn.onclick = function() {
     guildMenu.style.display = "none";
-	battleTint.style.display = "none";
+	document.getElementById("battleTint").style.display = "none";
   };
 
   // Display the guild menu.
   guildMenu.style.display = "block";
-  battleTint.style.display = "block";
+  document.getElementById("battleTint").style.display = "block";
 }
 
 function getCurrentMissionRequirement() {
-  // Requirements for missions 1 through 7:
   let requirements = [5, 10, 20, 30, 50, 100, 200];
   return requirements[player.guildMissionStage - 1] || 200;
 }
@@ -7437,7 +7481,7 @@ function handleMission() {
     player.money = Math.round(player.money + moneyReward);
     player.guildMissionStage++;
     player.guildMissionKills = 0;
-    setMissionUI();
+	setMissionUI();
     updateGuildRankUI();
     document.getElementById("guildRankText").innerText = "Guild Rank: " + getGuildRank();
     return;
@@ -7457,7 +7501,6 @@ function updateGuildMissionProgress() {
   let counterEl = document.getElementById("missionCounter");
   if (player.guildMissionKills >= req) {
     counterEl.innerText = "Mission Completed!";
-    // Optionally, update the guild menu to reflect new rank immediately.
     updateGuildRankUI();
   } else {
     counterEl.innerText = `${player.guildMissionKills}/${req}`;
@@ -7468,7 +7511,6 @@ function handleHireMercenary() {
   // Prompt the player for hiring a mercenary.
   let choice = confirm("Hire Mercenary for $200? Press OK to pay, Cancel for Nevermind.");
   if (!choice) {
-    alert("We hope you reconsider applying!");
     return;
   }
   if (player.money < 200) {
@@ -7909,31 +7951,31 @@ finalizeRoom(key);
 	let floorBonus = Math.max( Math.floor((floorCount / 10) * floorBoost), 1 );
 
 if (gameDifficulty === "normal") {
-    e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(15 * floorBonus * (player.level / floorCount));
-    e.damageRange = [
-        Math.ceil(e.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
-        Math.ceil(e.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
-    ];
-} else if (gameDifficulty === "hard") {
     e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(20 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         Math.ceil(e.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
         Math.ceil(e.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
     ];
+} else if (gameDifficulty === "hard") {
+    e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(25 * floorBonus * (player.level / floorCount));
+    e.damageRange = [
+        Math.ceil(e.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
+        Math.ceil(e.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
+    ];
 } else if (gameDifficulty === "extreme" && gameDifficulty === "doom") {
-    e.hp = Math.ceil(e.hp * floorBonus) + Math.round(20 * floorBonus * (player.level / floorCount));
+    e.hp = Math.ceil(e.hp * floorBonus) + Math.round(25 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         e.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
         e.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
     ];
 } else if (gameDifficulty === "insane") {
-	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(25 * floorBonus * (player.level / floorCount));
+	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(30 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         e.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
         e.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
     ];
 } else if (gameDifficulty === "ultimate") {
-	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(50 * floorBonus * (player.level / floorCount));
+	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(30 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         e.damageRange[0] + Math.round(10 * floorBonus * (player.level / floorCount)),
         e.damageRange[1] + Math.round(10 * floorBonus * (player.level / floorCount))
@@ -8301,6 +8343,7 @@ function getEnemyByName(enemyName) {
   if (!currentBGM) {
 	  resumeWorldMusicAfterBattle();
   }
+  updateGuildMissionProgress();
 }
 
 	   /*******************
@@ -8727,14 +8770,11 @@ if (player.mercenaries.length > 0) {
             } else {
                 alert("You failed to resurrect " + currentEnemy.name + ".");
             }
-			updateGuildMissionProgress();
             endBattle();
         } else {
-			updateGuildMissionProgress();
             endBattle();
         }
     } else {
-		updateGuildMissionProgress();
         endBattle();
     }
 }
@@ -9317,6 +9357,11 @@ document.addEventListener("keydown", e => {
     case "Heavy Slash":
 	  logBattle("<em>With one big windup, you strike with your sword!</em>");
       dealPlayerDamage(2);
+	  break;
+
+	case "Smash":
+	  logBattle("<em>You muster up all your strength as you lift up your hammer in the air, before smashing it onto the enemy.</em>");
+      dealPlayerDamage(1);
 	  break;
 	
 	case "Bash":
