@@ -679,7 +679,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
   bottom: 0;
   left: 0;
   width: 100%;
-  height: 175px;
+  height: 180px;
   background: #333;
   padding: 10px;
   box-sizing: border-box;
@@ -1146,7 +1146,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 
 #equipmentBtn {
   position: absolute;
-  top: 320px;
+  top: 300px;
   right: 1250px;
   width: 100px;
   height: 100px;
@@ -1283,6 +1283,76 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
   z-index: 9999;
   display: none;
   white-space: normal;
+}
+
+#classSelectionMenu {
+  display: none;              /* hidden by default */
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85); /* dark overlay */
+  z-index: 10010;             /* above battle tint (e.g. 10000) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#classSelectionMenu .modal-content {
+  background: #1a1a1a;
+  color: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.7);
+  max-width: 90%;
+  width: 360px;
+  text-align: center;
+  position: center;
+}
+
+#classSelectionMenu .modal-content h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+}
+
+#classSelectionMenu .modal-content button {
+  display: block;
+  width: 100%;
+  margin: 0.5rem 0;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: #7d7d7d;
+  border: 2px solid #555;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+#classSelectionMenu .modal-content button:hover {
+  background: #444;
+  border-color: #777;
+}
+
+#playerJobs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  background: transparent;
+  position: static;
+  top: 0;
+  left: 0;
+  width: auto;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.job {
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
 }
     </style>
   </head>
@@ -1552,7 +1622,13 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
       <!-- Stats Panel -->
       <div id="stats">
         <div id="playerLevel">Player Level: 1</div>
-	<div id="guildRankText"> Guild Rank: None </div>
+		<br>
+		<div id="playerJobs">
+			<br>
+			<div class="job">Organization: <span id="organizationText">None</span></div>
+			<div class="job">Rank: <span id="guildRankText">None</span></div>
+			<div class="job">Class: <span id="classText">None</span></div>
+		</div>
 		<div id="playerAbilitiesDisplay">
 			Player Attributes: <span id="hudPlayerPassive">None</span>&nbsp;&nbsp;&nbsp;&nbsp;Player Skill (Press Q to use): <span id="hudPlayerActive">None</span>&nbsp;&nbsp;&nbsp;&nbsp;Weapon Skill (Press E to use): <span id="hudWeaponSkill">None</span>
 		</div>
@@ -1717,8 +1793,8 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 	<div id="guildMenu" class="modal" style="display: none;">
   <div class="modal-content">
     <button id="closeGuildMenu" class="close-btn">X</button>
-    <h2><strong>GUILD</strong></h2>
-    <div id="guildRankText"> Guild Rank: Newbie </div>
+    <h2><strong>GUILD</strong></h2><br>
+    Guild Rank:<div id="guildRankText"> Newbie </div>
     <div class="guild-buttons">
       <button id="missionButton">Mission</button>
       <button id="hireMercenaryButton">Hire Mercenary</button>
@@ -1756,7 +1832,6 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 			<li><em><strong>Loot rooms</strong>: </em>Loot rooms were once considered "dumps" by the first warriors, where they would just throw away the materials dropped from monsters since they didn't know what to do with them yet. However, nowadays, people refer to them as Loot rooms as those materials are valuable to us now. Some Loot rooms even contain old equipment from past warriors who wandered here.</li>
 			<li><em><strong>Casino/Gambling rooms</strong>: </em>Casinos, or Gambling rooms, are illegal rooms created by businesspeople to make some extra cash in the middle of a domain. These are considered illegal as, A, they didn't get permission from the Guild, nor the government to have this built, B, they could possibly scam you of all of your valuables while you're out here in the middle of a domain, leaving you with nothing while there are monsters out and about, and C, these could risk the lives of warriors and adventurers, as monsters still lurk around these areas! So we recommend you do not go to these places.</li>
 			<li><em><strong>Legend/Boss rooms</strong>: </em>Legend rooms, or Boss rooms, are considered the danger zone of all rooms, as these rooms are where a Legend rests. Adventurers who go here either just came to look, the ones who marked the rooms, or are challengers who never came back out.</li>
-			<li><em><strong>Outlaw Domains</strong>: </em>Outlaw domains are areas that the Guild has no control over, as they are owned by Outlaws, a separate group that are basically criminals that thrive through crime. Be careful when encountering one, and please report to the Guild when you do.</li>
 			<li><em><strong>Cult domains</strong>: </em>Cult domains are another area that the Guild has no control over, as the Cult controls them. This "cult" basically worships monsters and treats them like the Greeks did to the Pantheon, offering and sacrificing anything and anyone they can get their hands on to hopefully "please" them in any way. Be careful when encountering one, and please report to the Guild when you do.</li>
 			<li><em><strong>The Guild</strong>: </em>Lastly, the Guild rooms, where all of our establishments are!</li>
 		</ul>
@@ -2846,9 +2921,6 @@ window.addEventListener("DOMContentLoaded", () => {
 	  let hasTitanUnlocked = false;
 	  let hasJumpBootsUnlocked = false;
 	  let hasMantleUnlocked = false;
-	  let hasMechArmsUnlocked = false;
-	  let hasMechArmorUnlocked = false;
-	  let hasReactorUnlocked = false;
 	  
 libraryButton.addEventListener("click", () => {
   tabHistory.style.display = hasHistoryUnlocked ? "inline-block" : "none";
@@ -3102,7 +3174,7 @@ casinoMusic.loop = true;
   dodgeChance: 0.2,
   neverMiss: false,
   critMultiplier: 1,
-  money: 1000,
+  money: 10,
   exp: 0,
   level: 1,
   expToLevel: 5,
@@ -3111,6 +3183,8 @@ casinoMusic.loop = true;
   iron: false,
   reflective: false,
   guildUnlocked: false,
+  organization: "None",
+  playerClass: "None",
   guildMissionStage: 0,
   guildMissionKills: 0,
   mercenaries: [],
@@ -3199,25 +3273,6 @@ casinoMusic.loop = true;
       p.attack *= 10;
     }
   },
-  "Mech Arms": p => {
-    if (p.equipment.accessory && p.equipment.accessory.name === "Nuclear Reactor" && p.equipment.armor && p.equipment.armor.name === "Mech Armor") {
-      p.attack *= 5;
-	  p.defense *= 2;
-    }
-  },
-  "Mech Armor": p => {
-    if (p.equipment.accessory && p.equipment.accessory.name === "Nuclear Reactor" && p.equipment.weapon && p.equipment.weapon.name === "Mech Arms") {
-	  p.maxArmor *= 3;
-      p.defense *= 2;
-    }
-  },
-  "Nuclear Reactor": p => {
-    if (p.equipment.weapon && p.equipment.weapon.name === "Mech Arms" && p.equipment.armor && p.equipment.armor.name === "Mech Armor") {
-      p.maxMana *= 3;
-	  p.defense *= 2;
-    }
-  },
-  
   "Excalibur": p => {
     // triple attack
     p.attack *= 3;
@@ -5489,7 +5544,7 @@ let shopItemsList = [
   },
   {
     name: "Shock Potion",
-    cost: 150,
+    cost: 200,
     type: "paralyzed",
     category: "consumable",
     usableInBattle: true,
@@ -6476,7 +6531,7 @@ function resumeWorldMusicAfterBattle() {
 
     // === Guild room chance ===
     // 1% before first discovery, then 5% thereafter
-    const guildChance = guildEncounteredBefore ? 0.05 : 0.01;
+    const guildChance = guildEncounteredBefore ? 0.1 : 0.05;
 	if (gameDifficulty !== "doom") {
 		if (Math.random() < guildChance) {
 			guildEncounteredBefore = true;
@@ -6738,66 +6793,6 @@ if (gameDifficulty !== "doom") {
     }
 	checkDragonBalls();
 	updateInventoryDisplay();
-    return;
-  }
-  
-  if (!hasMechArmsUnlocked && Math.random() < mythicalChance) {
-	hasMechArmsUnlocked = true;
-    const freeIdx = player.inventory.findIndex(slot => slot === null);
-    if (freeIdx !== -1) {
-      player.inventory[freeIdx] = {
-        name:     "Mech Arms",
-        type:     "equipment",
-        category: "weapon",
-		description: "Ancient technology from the post-modern era built as titans to fight against the gods. These are the limbs of the titans of war.",
-      };
-      updateStats();
-      updateManaDisplay();
-	  updateInventoryDisplay();
-      alert("You found an enormous pair of heavy, metallic limbs... (???)");
-    } else {
-      alert("Inventory full...");
-    }
-    return;
-  }
-  
-  if (!hasMechArmorUnlocked && Math.random() < mythicalChance) {
-	hasMechArmorUnlocked = true;
-    const freeIdx = player.inventory.findIndex(slot => slot === null);
-    if (freeIdx !== -1) {
-      player.inventory[freeIdx] = {
-        name:     "Mech Armor",
-        type:     "equipment",
-        category: "armor",
-		description: "Ancient technology from the post-modern era built as titans to fight against the gods. These are the plates that protect the titans of war.",
-      };
-      updateStats();
-      updateManaDisplay();
-	  updateInventoryDisplay();
-      alert("You found  huge, metallic plating... armor maybe? (???)");
-    } else {
-      alert("Inventory full...");
-    }
-    return;
-  }
-  
-  if (!hasReactorUnlocked && Math.random() < mythicalChance) {
-	hasReactorUnlocked = true;
-    const freeIdx = player.inventory.findIndex(slot => slot === null);
-    if (freeIdx !== -1) {
-      player.inventory[freeIdx] = {
-        name:     "Nuclear Reactor",
-        type:     "equipment",
-        category: "accessory",
-		description: "Ancient technology from the post-modern era built as titans to fight against the gods. This is the energy source to power up the titans of war.",
-      };
-      updateStats();
-      updateManaDisplay();
-	  updateInventoryDisplay();
-      alert("You found a generator of a powerful source of energy... (???)");
-    } else {
-      alert("Inventory full...");
-    }
     return;
   }
   
@@ -7389,9 +7384,93 @@ function showGuildApplicationPrompt() {
 	player.money -= 500;
 	alert("Thank you for applying. Welcome to the Guild!");
 	player.guildUnlocked = true;
-	showGuildMainMenu();
+	player.organization = "Guild";
+    showClassSelectionMenu();
   }
 }
+
+// ——— CLASS SELECTION MENU ———
+function showClassSelectionMenu() {
+  player.organization = "Guild";
+  const menu = document.getElementById("classSelectionMenu");
+  if (!menu) return console.error("No #classSelectionMenu in HTML!");
+  console.log("📢 Opening Class Selection Menu");
+  menu.style.display = "flex";
+  battleTint.style.display = "block";
+}
+
+// 2) Global inline handler from each button:
+function selectClass(cls) {
+  console.log("📢 selectClass() got:", cls);
+  player.playerClass = cls;
+  applyClassEffects(cls);
+  document.getElementById("classSelectionMenu").style.display = "none";
+  showGuildMainMenu();
+  updateStats();
+}
+
+function applyClassEffects(cls) {
+  // (You may want to clear previous buffs first if you store them)
+  switch (cls) {
+    case "Swordsman":
+      if (player.equipment.weapon?.type === "sword") {
+        player.attack = Math.ceil(player.attack * 1.10);
+      } else {
+        player.attack = Math.ceil(player.attack * 0.90);
+      }
+      break;
+
+    case "Assassin":
+      if (
+        player.equipment.weapon?.type === "dagger" ||
+        player.equipment.accessory?.type === "dagger"
+      ) {
+        player.attack = Math.ceil(player.attack * 1.20);
+      }
+      player.perception = Math.ceil(player.perception + 5);
+      player.dodgeChance = (player.dodgeChance || 0) + 0.10;
+      player.enemyDamageTaken = (player.enemyDamageTaken || 1) * 1.10;
+      break;
+
+    case "Tank":
+      player.defense = Math.ceil(player.defense * 1.25);
+      break;
+
+    case "Mage":
+      player.magic = Math.ceil(player.magic * 1.05);
+      player.attack = Math.ceil(player.attack * 0.85);
+      player.enemyDamageTaken = (player.enemyDamageTaken || 1) * 1.05;
+      break;
+
+    case "Expeditionist":
+      player.fortune = Math.ceil(player.fortune * 1.20);
+      player.luck    = Math.ceil(player.luck    * 1.20);
+      player.agility = Math.ceil(player.agility * 1.20);
+      player.attack  = Math.ceil(player.attack  * 0.90);
+      break;
+
+    case "All-rounder":
+      [
+        "attack", "defense", "magic",
+        "agility","perception","potential",
+        "luck",   "fortune"
+      ].forEach(stat => {
+        player[stat] = Math.ceil(player[stat] + 2);
+      });
+      break;
+
+    default:
+      console.warn("Unknown class:", cls);
+  }
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  document
+    .querySelectorAll('#classSelectionMenu button[data-class]')
+    .forEach(btn => {
+      btn.addEventListener('click', e => selectClass(e.currentTarget.dataset.class));
+    });
+});
 
 function getGuildRank() {
   let ranks = ["Newbie", "Rookie", "Amateur", "Journeyman", "Pro", "Veteran", "Master", "Grandmaster"];
@@ -7403,9 +7482,9 @@ function updateGuildRankUI() {
   const els = document.querySelectorAll('#guildRankText');
   els.forEach(el => {
     if (!player.guildUnlocked) {
-      el.innerText = "Guild Rank: None";
+      el.innerText = "Rank: None";
     } else {
-      el.innerText = "Guild Rank: " + getGuildRank();
+      el.innerText = getGuildRank();
     }
   });
 }
@@ -7680,7 +7759,7 @@ finalizeRoom(key);
     // launch via ambush flow
     ambushEnemiesQueue = [ warrior ];
     currentEnemy        = ambushEnemiesQueue.shift();
-    const minLv = Math.max(player.level - 3, 1);
+		const minLv = Math.max(player.level - 5, 1);
         const maxLv = player.level + 5;
         const enemyLevel = Math.floor(Math.random() * (maxLv - minLv + 1)) + minLv;
         currentEnemy.level = enemyLevel;
@@ -7718,7 +7797,7 @@ finalizeRoom(key);
   let bossData = JSON.parse(JSON.stringify(bossTemplate));
   currentEnemy = JSON.parse(JSON.stringify(bossData));;
   if (currentEnemy === "The Restricted One, Kyojiro Allista") {
-	  alert("You have entered a Boss Room... but wait, a Mysterious Man stands in your way.");
+	  alert("You have encountered a Legend Room... but wait, a Mysterious Man stands in your way.");
   } else if (currentEnemy === "Omni") {
 	  alert("You sense a powerful presence, be careful.");
 	  alert("''Greetings human, we finally meet. Shall we begin the test?''");
@@ -7740,11 +7819,11 @@ finalizeRoom(key);
 	  alert("The monster's presence is almost familiar, similar to that god you faced before, but you stand your ground as you prepare to battle once more.");
   } else if (currentEnemy === "The Black King") {
 	  alert("You get the feeling you are about to die... but you go anyway.");
-	  alert("You have entered a Boss Room. Be careful.");
+	  alert("You have encountered a Legend Room. Be careful.");
   } else if (currentEnemy === "King God General Emperor, Supreme Divine Entity of Ultimacy, Archangel & Creator, Gabriel") {
 	  alert("After everything you've been through, it's finally time. All of your effort, your struggles, and your victories, has come to this one moment. Good luck, warrior.");
   } else {
-	  alert("You have entered a Boss Room. Be careful.");
+	  alert("You have encountered a Legend Room. Be careful.");
   }
   player.weaponSkill.usedThisBattle = false;
   skillUsedThisBattle = true;
@@ -7799,10 +7878,10 @@ finalizeRoom(key);
     const floorBoost = 1 + floorCount * 0.1;
     const floorBonus = Math.max(Math.floor((floorCount / 10) * floorBoost), 1);
 
-    bossData.hp += Math.round(25 * floorBonus * (player.level / floorCount));
+    bossData.hp += Math.round(30 * floorBonus * (player.level / floorCount));
     bossData.damageRange = [
-      bossData.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
-      bossData.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
+      bossData.damageRange[0] + Math.round(5 * floorBonus * (player.level / floorCount)),
+      bossData.damageRange[1] + Math.round(5 * floorBonus * (player.level / floorCount))
     ];
 
     const rewardMultiplier = Math.pow(1.5, floorBonus);
@@ -7845,25 +7924,25 @@ finalizeRoom(key);
   let bossData = getBossForFloor(floorCount);
   
   if (gameDifficulty === "normal") {
-    bossData.hp = bossData.hp + Math.ceil(25 * floorBonus * (player.level / floorCount));
-    bossData.damageRange = [
-        Math.ceil(bossData.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
-        Math.ceil(bossData.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
-    ];
-} else if (gameDifficulty === "hard") {
     bossData.hp = bossData.hp + Math.ceil(30 * floorBonus * (player.level / floorCount));
     bossData.damageRange = [
         Math.ceil(bossData.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
         Math.ceil(bossData.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
     ];
+} else if (gameDifficulty === "hard") {
+    bossData.hp = bossData.hp + Math.ceil(35 * floorBonus * (player.level / floorCount));
+    bossData.damageRange = [
+        Math.ceil(bossData.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
+        Math.ceil(bossData.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
+    ];
 } else if (gameDifficulty === "extreme") {
-    bossData.hp = bossData.hp + Math.round(30 * floorBonus * (player.level / floorCount));
+    bossData.hp = bossData.hp + Math.round(35 * floorBonus * (player.level / floorCount));
     bossData.damageRange = [
         bossData.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
         bossData.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
     ];
 } else if (gameDifficulty === "insane") {
-	bossData.hp = bossData.hp + Math.round(35 * floorBonus * (player.level / floorCount));
+	bossData.hp = bossData.hp + Math.round(40 * floorBonus * (player.level / floorCount));
     bossData.damageRange = [
         bossData.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
         bossData.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
@@ -7953,25 +8032,25 @@ finalizeRoom(key);
 	let floorBonus = Math.max( Math.floor((floorCount / 10) * floorBoost), 1 );
 
 if (gameDifficulty === "normal") {
-    e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(20 * floorBonus * (player.level / floorCount));
+    e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(15 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         Math.ceil(e.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
         Math.ceil(e.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
     ];
 } else if (gameDifficulty === "hard") {
-    e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(25 * floorBonus * (player.level / floorCount));
+    e.hp = Math.ceil(e.hp * floorBonus) + Math.ceil(20 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         Math.ceil(e.damageRange[0] + 3 * floorBonus * (player.level / floorCount)),
         Math.ceil(e.damageRange[1] + 3 * floorBonus * (player.level / floorCount))
     ];
 } else if (gameDifficulty === "extreme" && gameDifficulty === "doom") {
-    e.hp = Math.ceil(e.hp * floorBonus) + Math.round(25 * floorBonus * (player.level / floorCount));
+    e.hp = Math.ceil(e.hp * floorBonus) + Math.round(20 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         e.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
         e.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
     ];
 } else if (gameDifficulty === "insane") {
-	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(30 * floorBonus * (player.level / floorCount));
+	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(25 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         e.damageRange[0] + Math.round(4 * floorBonus * (player.level / floorCount)),
         e.damageRange[1] + Math.round(4 * floorBonus * (player.level / floorCount))
@@ -7983,7 +8062,7 @@ if (gameDifficulty === "normal") {
         e.damageRange[1] + Math.round(10 * floorBonus * (player.level / floorCount))
     ];
 } else {
-	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(30 * floorBonus * (player.level / floorCount));
+	e.hp = Math.ceil(e.hp * floorBonus) + Math.round(25 * floorBonus * (player.level / floorCount));
     e.damageRange = [
         e.damageRange[0] + Math.round(5 * floorBonus * (player.level / floorCount)),
         e.damageRange[1] + Math.round(5 * floorBonus * (player.level / floorCount))
@@ -8700,7 +8779,11 @@ function dealPlayerMagicDamage(mult = 1) {
       alert(`${currentEnemy.name} defeated!`);
       endBattle();
       return;
-    }
+    } else if (currentEnemy.hp <= 0 && currentEnemy.boss) {
+	  alert(`You have slayed the Legend, ${currentEnemy.name}!`);
+      endBattle();
+      return;
+	}
 	// Mercenary dodge check
 if (player.mercenaries.length > 0) {
   // did enemy hit? if they fail the dodge roll, mercenary dies immediately
@@ -11049,9 +11132,26 @@ function updatePlayerStatsUI() {
   document.getElementById("hpText").innerText = `${player.hp}/${effectiveMaxHp.toFixed(0)}`;
 }
 
-/*******************
-       * STATS UI
-       *******************/
+/********************
+	STATS UI
+*******************/
+function clampPlayerStats() {
+  const statsToClamp = [
+    'attack',
+    'defense',
+    'magic',
+    'agility',
+    'perception',
+    'potential',
+    'luck',
+    'fortune',
+    'dodgeChance'
+  ];
+  statsToClamp.forEach(stat => {
+    if (player[stat] < 0) player[stat] = 0;
+  });
+}
+
       function updateStats() {
   const extra = getGuildBonuses();
 
@@ -11119,6 +11219,12 @@ function updatePlayerStatsUI() {
       el.textContent = `Player Level: ${player.level}`;
     }
   });
+  
+  document.getElementById("organizationText").textContent = player.organization;
+  document.getElementById("guildRankText").textContent = player.guildUnlocked ? getGuildRank() : "None";
+  document.getElementById("classText").textContent = player.playerClass;
+
+  clampPlayerStats();
 }
 
 function updateInventoryDisplay() {
