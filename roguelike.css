@@ -1,0 +1,1444 @@
+body {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background: black;
+  color: white;
+  font-family: sans-serif;
+  text-align: center;
+  overflow: auto;
+}
+
+#loadingScreen {
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: black;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+  opacity: 1;
+  transition: opacity 1s ease;
+}
+.loading-text {
+  color: white;
+  font-size: 2em;
+  font-family: sans-serif;
+}
+/* keyframes for looping dots */
+@keyframes dotPulse {
+  0%   { content: "."; }
+  33%  { content: ".."; }
+  66%  { content: "..."; }
+  100% { content: ""; }
+}
+#dots::after {
+  content: "";
+  animation: dotPulse 1s infinite steps(1, end);
+}
+
+#difficultyMenu button {
+  color: white;
+  font-weight: bold;
+  padding: 0.5em 1em;
+  border: 1px solid white;
+  border-radius: 4px;
+  margin: 0.25em;
+  cursor: pointer;
+}
+
+#normalBtn {
+  background-color: gray;
+  color: black;
+}
+
+#hardBtn {
+  background-color: orange;
+  color: black;
+}
+
+#extremeBtn {
+  background-color: red;
+  color: black;
+}
+
+#insaneBtn {
+  background-color: #700000;
+  color: black;
+}
+
+#calamityBtn {
+  background-color: black;
+  color: red;
+}
+
+#bossRushBtn {
+  background-color: blue;
+  color: white;
+}
+
+#doomBtn {
+  background-color: #2e0000;
+  width: 50px;
+}
+
+#ultimateBtn {
+  background-color: #f4ff57;
+  color: white;
+}
+
+/* Hover states to brighten them up */
+#difficultyMenu button:hover {
+  opacity: 0.85;
+}
+
+/*DOOM MODE*/
+
+@keyframes levitate {
+  0%, 100% { transform: translateY(0); }
+  50%     { transform: translateY(-2px); }
+}
+
+@keyframes slow-zoom {
+  0%, 100% { background-size: 100% 100%; }
+  50%      { background-size: 102% 102%; }
+}
+
+#doomModeButton {
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  margin: 0 auto 0.0005px;
+}
+
+/* Center box for title + button */
+#doomTitleScreen {
+  display: none;
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: url("doomcover.jpg") center/cover no-repeat;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;      /* push content to top */
+  padding-top: 40px;            /* space below top edge */
+  z-index: 2000;
+  font-family: "Copperplate Gothic Bold", "Copperplate Gothic", Copperplate, fantasy;
+  font-weight: bold;
+  animation: slow-zoom 20s ease-in-out infinite;
+}
+
+#doomTitleContent {
+  text-align: center;
+  padding: 20px;
+  border-radius: 6px;
+}
+
+#doomTitleContent p {
+	right: 500px;
+	top: 50px;
+	background: rgba(0, 0, 0, 0.5);
+}
+
+#doomTitleImage {
+  max-width: 40%;               /* shrink it */
+  height: auto;
+  margin: 0 auto 30px;          /* centered, with bottom gap */
+  animation: levitate 3s ease-in-out infinite;
+}
+
+#doomTitleImg {
+  max-width: 40%;               /* shrink it */
+  height: auto;
+  margin: 0 auto 30px;          /* centered, with bottom gap */
+  animation: levitate 3s ease-in-out infinite;
+}
+
+#beginJourneyBtn {
+  background: none;             /* no bg */
+  color: white;                 /* white text */
+  font-size: 22px;
+  border: none;
+  cursor: pointer;
+  font-family: "Copperplate Gothic Bold", "Copperplate Gothic", Copperplate, fantasy;
+  font-weight: bold;
+}
+
+#beginJourneyBtn:hover {
+  opacity: 0.8;
+}
+
+/* Black overlay for fade effect */
+#doomFadeOverlay {
+  position: fixed;
+  top:0; left:0;
+  width:100vw; height:100vh;
+  background: black;
+  opacity: 0;
+  transition: opacity 3s;
+  z-index: 3000;
+}
+
+body.doom-mode #stats {
+  color: #ff6200;
+  background-color: #2e0000;
+  border: black;
+}
+
+body.doom-mode .room {
+  background-color: #2e0000 !important; /* match stats-menu bg */
+  border: 2px solid #ff6200 !important;  /* match stats-menu text */
+}
+
+/* And player if it’s a DOM element */
+body.doom-mode .player {
+  width: 25px;
+  height: 25px;
+  background-color: #174000;
+}
+
+body.doom-mode .inventorySlot {
+  width: 40px;
+  height: 40px;
+  background: #174000;
+  display: inline-block;
+  position: relative;
+  margin: 2px;
+  border: 1px solid black;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 40px;
+}
+
+body.doom-mode .hpBar,
+body.doom-mode .armorBar,
+body.doom-mode .manaBar,
+body.doom-mode .expBar {
+  width: 200px;
+  height: 20px;
+  position: relative;
+  display: inline-block;
+  background: black;
+  margin-top: 5px;
+}
+
+body.doom-mode .hpBarInner {
+  height: 100%;
+  background: #2e7300;
+  width: 100%;
+}
+
+body.doom-mode .expBarInner {
+  height: 100%;
+  background: #eb9a05;
+  width: 0%;
+}
+
+body.doom-mode .manaBarInner {
+  height: 100%;
+  background: gray;
+  width: 100%;
+}
+
+body.doom-mode .armorBarInner {
+  background: #303030;
+}
+
+body.doom-mode #battleMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-120%, -50%);
+  background: #174000;
+  border: 2px solid black;
+  padding: 20px;
+  display: none;
+  z-index: 100;
+}
+
+body.doom-mode #battleMenu h3 {
+  margin: 0 0 10px;
+  color: white;
+}
+
+body.doom-mode #battleOptions button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: black;
+  border: #ff6200;
+  color: white;
+  cursor: pointer;
+}
+
+body.doom-mode #battleOptions button:hover {
+  background: #1c1c1c;
+}
+
+body.doom-mode #battleLog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(20%, -50%);
+  background: #174000;
+  border: 2px solid black;
+  padding: 20px;
+  display: none;
+  z-index: 100;
+  width: 250px;
+  height: 200px;
+  overflow-y: auto;
+}
+
+body.doom-mode #inventoryMenu {
+  display: none;
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background: #174000;
+  border: 2px solid black;
+  padding: 10px;
+  z-index: 150;
+}
+
+body.doom-mode #inventoryMenu button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: black;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+body.doom-mode #inventoryMenu button:hover {
+  background: #1c1c1c;
+}
+
+body.doom-mode #levelUpMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #174000;
+  border: 2px solid black;
+  padding: 20px;
+  display: none;
+  z-index: 200;
+}
+
+body.doom-mode #levelUpMenu button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: black;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+body.doom-mode #levelUpMenu button:hover {
+  background: #1c1c1c;
+}
+
+body.doom-mode #shopMenu {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #174000;
+  border: 2px solid black;
+  padding: 20px;
+  z-index: 250;
+  width: 300px;
+}
+
+body.doom-mode #shopMenu h3 {
+  margin-top: 0;
+  color: white;
+}
+
+body.doom-mode #shopMenu button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: black;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+body.doom-mode #shopMenu button:hover {
+  background: #1c1c1c;
+}
+
+body.doom-mode #deathMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #174000;
+  border: 2px solid black;
+  padding: 20px;
+  display: none;
+  z-index: 300;
+  text-align: center;
+}
+
+body.doom-mode #deathMenu button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background: black;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+body.doom-mode #deathMenu button:hover {
+  background: #1c1c1c;
+}
+
+body.doom-mode #equipmentBtn {
+  position: absolute;
+  top: 320px;      /* adjust to fit your layout */
+  right: 1250px;    /* place near the other HUD elements */
+  width: 100px;
+  height: 100px;
+  background: #2e0000;
+  border: 2px solid #ff6200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 40;
+  transition: background 0.2s;
+}
+
+body.doom-mode #equipmentBtn:hover {
+  background: rgba(46, 0, 0, 0.5);
+}
+
+body.doom-mode #equipmentBtn img {
+  width: 90px;
+  height: 90px;
+}
+
+/* Equipment Menu Modal */
+body.doom-mode #equipmentMenu.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #174000;
+  border: 2px solid black;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 650;
+  width: 300px;
+  color: white;
+}
+
+body.doom-mode #equipmentMenu .modal-content {
+  position: relative;
+}
+
+body.doom-mode #equipmentMenu .close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: black;
+  border: white;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+body.doom-mode #equipmentMenu #equipmentSlots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+body.doom-mode .equipmentSlot {
+  border: 2px solid black;
+  padding: 8px;
+  position: relative;
+  cursor: pointer;
+}
+body.doom-mode .equipmentSlot .slot-label {
+  font-weight: bold;
+}
+body.doom-mode .equipmentSlot .unequipBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: black;
+  border: none;
+  color: white;
+  font-size: 14px;
+  padding: 2px 6px;
+  cursor: pointer;
+  display: none;
+}
+body.doom-mode .equipmentSlot:hover .unequipBtn {
+  display: block;
+}
+
+/*DOOM MODE*/
+
+#titleBox {
+  background: rgba(0, 0, 0, 0);
+  padding: 40px;
+  border-radius: 12px;
+  text-align: center;
+  max-width: 700px;
+  box-shadow: 0 0 15px rgba(0,0,0,0);
+}
+
+#titleScreen h6 {
+	position: fixed;
+	top: -10px;
+	left: 5px;
+}
+
+#titleBox h6 {
+	margin-top: 100px;
+}
+
+#playButton {
+  display: none;
+  margin: 20px auto;
+  margin-top: 50px;
+}
+
+#creditsToggle {
+  margin: 10px auto 0 auto;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  background: #0a0a0a;
+  border: 1px solid white;
+}
+
+#creditsCredits {
+  position: absolute;
+  left: 50%;
+  top: 20%;
+  transform: translateX(-50%);
+  width: 400px;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 15px;
+  border: 1px solid #888;
+  display: none;
+  z-index: 150;
+  border-radius: 4px;
+}
+
+#creditsCredits h1 {
+	font-family: 'Edwardian Script ITC', cursive;
+}
+
+#creditsCredits h2 {
+	font-family: 'Edwardian Script ITC', cursive;
+}
+
+#creditsCredits .tabs {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#creditsCredits button {
+  padding: 5px 10px;
+  cursor: pointer;
+  margin: 0 5px;
+}
+
+#contentCredits.content.scrollable {
+   max-height: 300px;
+   overflow-y: auto;
+   margin-top: 10px;
+   font-size: 14px;
+   line-height: 1.4;
+}
+
+#exitCredits {
+  display: block;
+  margin: 10px auto 0 auto;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+#worldCounter {
+  position: fixed;
+  top: 10px;
+  left: 10px;
+  z-index: 500;
+  background: rgba(0, 0, 0, 0.5);
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-size: 18px;
+}
+
+#gameContainer {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: auto;
+  overflow-y: auto;
+}
+
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transition: transform 0.3s ease;
+}
+
+.room {
+  width: 100px;
+  height: 100px;
+  background: #222;
+  position: absolute;
+  border: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
+.room:hover {
+  border: 2px solid green;
+  cursor: pointer;
+}
+
+.player {
+  width: 20px;
+  height: 20px;
+  background: blue;
+}
+
+#stats {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 190px;
+  background: #333;
+  padding: 10px;
+  box-sizing: border-box;
+  border: 1px solid #111111;
+}
+
+.barContainer {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+.hpBar,
+.manaBar,
+.expBar,
+.armorBar {
+  width: 200px;
+  height: 20px;
+  position: relative;
+  display: inline-block;
+  border: 1px solid #111111;
+  background: #555;
+  margin-top: 5px;
+}
+
+.hpBarInner {
+  height: 100%;
+  background: green;
+  width: 100%;
+}
+
+.expBarInner {
+  height: 100%;
+  background: yellow;
+  width: 0%;
+}
+
+.manaBarInner {
+  height: 100%;
+  background: blue;
+  width: 100%;
+}
+
+.armorBarInner {
+  height: 100%;
+  background: gray;
+  width: 100%;
+}
+
+#statsText {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 20px;
+}
+
+#inventorySlots {
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+}
+
+.inventorySlot {
+  width: 40px;
+  height: 40px;
+  background: #555;
+  display: inline-block;
+  position: relative;
+  margin: 2px;
+  border: 1px solid #777;
+  box-sizing: border-box;
+  text-align: center;
+  line-height: 40px;
+}
+
+.inventorySlot.weapon {
+  background-color: red;
+  color: white;
+}
+.inventorySlot.armor {
+  background-color: yellow;
+  color: black;
+}
+.inventorySlot.accessory {
+  background-color: green;
+  color: white;
+}
+.inventorySlot.consumable {
+  background-color: gray;
+  color: white;
+}
+.inventorySlot.dragonball {
+  background-color: orange;
+  color: red;
+}
+
+.inventorySlot .delete-btn {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 16px;
+  height: 16px;
+  line-height: 14px;
+  text-align: center;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  padding: 0;
+  margin: 0;
+}
+
+.inventorySlot:hover .delete-btn {
+  display: block;
+}
+
+.inventorySlot span {
+  display: inline-block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#battleTint {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 50;
+}
+
+#battleMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-120%, -50%);
+  background: #222;
+  border: 2px solid white;
+  padding: 20px;
+  display: none;
+  z-index: 100;
+}
+
+#battleMenu h3 {
+  margin: 0 0 10px;
+}
+
+#battleOptions button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: #555;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+#battleOptions button:hover {
+  background: #777;
+}
+
+#battleLog {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(20%, -50%);
+  background: #222;
+  border: 2px solid white;
+  padding: 20px;
+  display: none;
+  z-index: 100;
+  width: 250px;
+  height: 200px;
+  overflow-y: auto;
+}
+
+#inventoryMenu {
+  display: none;
+  position: absolute;
+  top: 70%;
+  left: 50%;
+  transform: translate(-50%, 0);
+  background: #222;
+  border: 2px solid white;
+  padding: 10px;
+  z-index: 150;
+}
+
+#inventoryMenu button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: #555;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+#inventoryMenu button:hover {
+  background: #777;
+}
+
+#levelUpMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  border: 2px solid white;
+  padding: 20px;
+  display: none;
+  z-index: 1000;
+}
+
+#levelUpMenu button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: #555;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+#levelUpMenu button:hover {
+  background: #777;
+}
+
+#shopMenu {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  border: 2px solid white;
+  padding: 20px;
+  z-index: 250;
+  width: 300px;
+}
+
+#shopMenu h3 {
+  margin-top: 0;
+}
+
+#shopMenu button {
+  margin: 5px;
+  padding: 5px 10px;
+  background: #555;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+#shopMenu button:hover {
+  background: #777;
+}
+
+#deathMenu {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  border: 2px solid white;
+  padding: 20px;
+  display: none;
+  z-index: 300;
+  text-align: center;
+}
+
+#deathMenu h2 {
+	font-family: 'Copperplate Gothic Light', 'Copperplate', fantasy;
+}
+
+#deathMenu button {
+  margin-top: 10px;
+  padding: 5px 10px;
+  background: #555;
+  border: none;
+  color: white;
+  cursor: pointer;
+  height: 30px;
+  width: 100px;
+}
+
+#deathMenu button:hover {
+  background: #777;
+}
+
+#playerLevel {
+  font-size: 18px;
+  margin-bottom: 5px;
+}
+
+#casinoMenu {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #222;
+  border: 2px solid white;
+  padding: 20px;
+  z-index: 350;
+  text-align: center;
+  width: 400px;
+}
+
+#casinoMenu h3 {
+  margin-top: 0;
+}
+
+#casinoMenu input[type="number"] {
+  width: 80px;
+  padding: 5px;
+  margin: 10px 0;
+}
+
+#casinoMenu .cardButtons button {
+  margin: 5px;
+  padding: 15px 20px;
+  font-size: 18px;
+  background: #555;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+#casinoMenu .cardButtons button:hover {
+  background: #777;
+}
+
+#casinoMenu .smallButton {
+  padding: 8px 15px;
+  font-size: 14px;
+  background: #666;
+  border: none;
+  color: white;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#casinoMenu .smallButton:hover {
+  background: #888;
+}
+
+/* Guild Menu Modal */
+#guildMenu.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 350;
+  background: rgba(0, 0, 0, 0.9);
+  padding: 20px;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+/* Modal content styling */
+#guildMenu .modal-content {
+  position: relative;
+}
+
+/* Close button style */
+#guildMenu .close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #444;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+#guildMenu .close-btn:hover {
+  background: #666;
+}
+
+/* Style the guild buttons */
+#guildMenu .guild-buttons button {
+  margin-top: 30px;
+  padding: 10px 20px;
+  background: #555;
+  border: 2px solid black;
+  color: #fff;
+  cursor: pointer;
+}
+
+#guildMenu .guild-buttons button:hover {
+  background: #777;
+}
+
+#cultMenu {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  background: rgba(30, 0, 20, 0.95);
+  border: 3px solid #550033;
+  border-radius: 8px;
+  box-shadow: 0 0 15px rgba(85, 0, 51, 0.8);
+  z-index: 350;
+}
+
+#cultMenu .modal-content {
+  padding: 20px;
+  color: #f5e6ff;
+  font-family: 'Cinzel', serif;
+  text-align: center;
+}
+
+#cultMenu h2 {
+  margin-top: 0;
+  font-size: 1.6em;
+  color: #ff99ff;
+  text-shadow: 0 0 4px #550033;
+}
+
+#cultMenu .close-btn {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  font-size: 1.2em;
+  color: #f5e6ff;
+  cursor: pointer;
+}
+
+#cultMenu .close-btn:hover {
+  color: #ff99ff;
+}
+
+#cultMenu #cultRankText {
+  margin: 12px 0 20px;
+  font-weight: bold;
+}
+
+#cultMenu .guild-buttons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 10px;
+}
+
+#cultMenu .guild-buttons button {
+  flex: 1;
+  margin: 0 5px;
+  padding: 8px 0;
+  background: #550033;
+  border: 2px solid #ff66ff;
+  border-radius: 4px;
+  color: #f5e6ff;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+#cultMenu .guild-buttons button:hover {
+  background: #660044;
+  transform: translateY(-1px);
+}
+
+#cultMenu .guild-buttons button:active {
+  transform: translateY(1px);
+}
+
+#cultLibraryMenu {
+  position: fixed; top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px;
+  background: rgba(25, 0, 15, 0.97);
+  border: 2px solid #440022;
+  border-radius: 6px;
+  box-shadow: 0 0 12px rgba(68, 0, 34, 0.7);
+  z-index: 400;
+  overflow-y: auto;
+}
+#cultLibraryMenu .content.scrollable {
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+#cultLibraryMenu .modal-content {
+  padding: 18px;
+  color: #e8d4f8;
+  font-family: 'Cinzel', serif;
+}
+#cultLibraryMenu h2 {
+  margin-top: 0; font-size: 1.4em; color: #ff99ff;
+  text-shadow: 0 0 3px #550033;
+}
+#cultLibraryMenu #cultLibraryBooks button {
+  display: block; width: 100%; margin: 6px 0;
+  padding: 6px; border: 1px solid #aa66aa;
+  background: #330011; color: #e8d4f8;
+  cursor: pointer; border-radius: 4px;
+}
+#cultLibraryMenu #cultLibraryBooks button:hover {
+  background: #440022;
+}
+
+/* === Cult Objectives Modal === */
+#cultObjectiveMenu {
+  position: fixed; top: 52%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 280px;
+  background: rgba(20, 0, 20, 0.95);
+  border: 2px solid #550044;
+  border-radius: 6px;
+  box-shadow: 0 0 10px rgba(85, 0, 68, 0.6);
+}
+#cultObjectiveMenu .modal-content {
+  padding: 16px; color: #ffe6ff; font-family: sans-serif;
+}
+#cultObjectiveMenu h2 {
+  margin-top: 0; font-size: 1.3em; color: #ff66ff;
+}
+#cultObjectiveMenu #cultObjectivesContent {
+  margin-top: 10px;
+  font-size: 0.95em; line-height: 1.4;
+}
+
+#cultLibraryMenu, #cultObjectiveMenu {
+  /* ... your existing styles ... */
+  z-index: 360;  /* above battleTint which is probably 10000 */
+}
+
+#libraryMenu {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 400px;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  padding: 15px;
+  border: 2px solid #888;
+  border-radius: 8px;
+  z-index: 400;
+  overflow-y: auto;
+}
+
+#libraryMenu .tabs {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+#libraryMenu .tabs button {
+  padding: 5px 10px;
+  margin: 0 5px;
+  cursor: pointer;
+  background: #555;
+  border: 2px solid black;
+  color: white;
+}
+
+#libraryMenu .tabs button:hover {
+  background: #777;
+}
+
+#libraryMenu .content.scrollable {
+  max-height: 300px;
+  overflow-y: auto;
+  font-size: 14px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+#exitLibrary {
+  display: block;
+  margin: 0 auto;
+  padding: 5px 10px;
+  cursor: pointer;
+  background: #555;
+  border: none;
+  color: white;
+}
+
+#exitLibrary:hover {
+  background: #777;
+}
+
+#sellMenu {
+	display: none;
+     position: absolute;
+     top: 50%;
+     left: 50%;
+     transform: translate(-50%, -50%);
+     background: #222;
+     border: 2px solid white;
+     padding: 20px;
+     z-index: 260;
+     width: 300px;
+}
+
+/* Equipment Button on HUD */
+#equipmentBtn {
+  position: absolute;
+  top: 290px;      /* adjust to fit your layout */
+  right: 1250px;    /* place near the other HUD elements */
+  width: 100px;
+  height: 100px;
+  background: gray;
+  border: 2px solid white;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 40;
+  transition: background 0.2s;
+}
+
+#equipmentBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+#equipmentBtn img {
+  width: 90px;
+  height: 90px;
+}
+
+/* Equipment Menu Modal */
+#equipmentMenu.modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0,0,0,0.9);
+  border: 2px solid white;
+  padding: 20px;
+  border-radius: 8px;
+  z-index: 650;
+  width: 300px;
+  color: white;
+}
+#equipmentMenu .modal-content {
+  position: relative;
+}
+#equipmentMenu .close-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background: #444;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+#equipmentMenu #equipmentSlots {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+.equipmentSlot {
+  border: 1px solid #777;
+  padding: 8px;
+  position: relative;
+  cursor: pointer;
+}
+.equipmentSlot .slot-label {
+  font-weight: bold;
+}
+.equipmentSlot .unequipBtn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: #555;
+  border: none;
+  color: white;
+  font-size: 14px;
+  padding: 2px 6px;
+  cursor: pointer;
+  display: none;
+}
+.equipmentSlot:hover .unequipBtn {
+  display: block;
+}
+
+@keyframes zoomBeat {
+  0%   { transform: scale(1); }
+  25%  { transform: scale(1.05); }
+  50%  { transform: scale(1); }
+}
+
+@keyframes zoomBeatShop {
+  0%   { transform: translate(-50%, -50%) scale(1); }
+  25%  { transform: translate(-50%, -50%) scale(1.025); }
+  50%  { transform: translate(-50%, -50%) scale(1); }
+}
+
+/* this class simply runs the keyframe once */
+.jump-zoom-fire {
+  animation: zoomBeat 0.49s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-tokyo {
+  animation: zoomBeat 0.475s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-hero {
+  animation: zoomBeat 0.48s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-special {
+  animation: zoomBeat 0.51s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-bang {
+  animation: zoomBeat 0.39s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-shop {
+  animation: zoomBeatShop 0.33s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-level {
+  animation: zoomBeat 0.52s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-titan {
+  animation: zoomBeat 0.43s infinite;
+  transform-origin: center center;
+}
+
+.jump-zoom-rumbling {
+  animation: zoomBeat 0.835s infinite;
+  transform-origin: center center;
+}
+
+#wishMenu {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#wishMenu .modal-content {
+  background: #222;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+#wishMenu button {
+ margin: 8px;
+ padding: 10px 16px;
+}
+
+#tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(0,0,0,0.75);
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  z-index: 9999;
+  display: none;
+  white-space: normal;
+}
+
+#playerJobs {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  padding: 10px;
+  background: transparent;
+  position: static;
+  top: 0;
+  left: 0;
+  width: auto;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.job {
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+#player-level-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px; /* space between level & badges */
+}
+.status-burned    { background: #e74c3c; color: #fff; padding:2px 6px; border-radius:4px; font-size:0.8em; }
+.status-poisoned  { background: #27ae60; color: #fff; padding:2px 6px; border-radius:4px; font-size:0.8em; }
+.status-weakened  { background: #8e5a2b; color: #fff; padding:2px 6px; border-radius:4px; font-size:0.8em; }
+.status-paralyzed { background: #f1c40f; color: #000; padding:2px 6px; border-radius:4px; font-size:0.8em; }
+.status-frozen    { background: #3498db; color: #fff; padding:2px 6px; border-radius:4px; font-size:0.8em; }
+.status-asleep    { background: #7f8c8d; color: #fff; padding:2px 6px; border-radius:4px; font-size:0.8em; }
