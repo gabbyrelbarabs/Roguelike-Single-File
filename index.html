@@ -1286,52 +1286,58 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 }
 
 #classSelectionMenu {
-  display: none;              /* hidden by default */
-  position: fixed;
-  top: 0; left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0, 0, 0, 0.85); /* dark overlay */
-  z-index: 10010;             /* above battle tint (e.g. 10000) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none;                                       /* hidden until showClassSelectionMenu() */
+  position: absolute;                                     /* same as abilityMenu */
+  top: 50%; left: 50%; transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.85);                     /* same dark backdrop */
+  padding: 20px 24px;                                       /* same padding */
+  border: 2px solid white;                             /* same border */
+  border-radius: 10px;                                 /* same rounding */
+  z-index: 900;                                        /* same layer as abilityMenu */ 
+  max-width: 800px;                                    /* match abilityMenu’s width limit */ 
 }
 
-#classSelectionMenu .modal-content {
-  background: #1a1a1a;
-  color: #fff;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.7);
-  max-width: 90%;
-  width: 360px;
-  text-align: center;
-  position: center;
+/* 2) Use library’s inner scroll for our entries */
+#classSelectionMenu .content.scrollable {
+  display: block;        /* block so it stacks under the H2 */
+  margin: 1rem 0;        /* space above and below */
+  padding: 0 16px;       /* horizontal padding so buttons never touch the “walls” */
+  max-height: 300px;     
+  overflow-y: auto;      
+  box-sizing: border-box;
+  border: 2px solid white;
 }
 
-#classSelectionMenu .modal-content h2 {
-  margin-top: 0;
-  margin-bottom: 1rem;
-  font-size: 1.5rem;
+/* 2) Each entry’s button + info vertical */
+#classSelectionMenu .class-entry {
+  margin-bottom: 1.5rem; /* space between entries */
 }
 
-#classSelectionMenu .modal-content button {
+/* 3) Make buttons wide, rectangular, with curved corners */
+#classSelectionMenu .class-entry button {
   display: block;
-  width: 100%;
-  margin: 0.5rem 0;
-  padding: 0.75rem;
+  width: 100%;           /* full width inside the padded scroll area */
+  box-sizing: border-box;
+  padding: 0.75rem 1rem; /* comfy tap/click area */
+  border-radius: 6px;    /* curved corners */
+  background: #555;      /* match your other menus */
+  border: none;
+  color: #fff;
   font-size: 1rem;
-  background: #7d7d7d;
-  border: 2px solid #555;
-  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  margin: 0;             /* no extra outer margin */
+  border: 1px solid white;
 }
 
-#classSelectionMenu .modal-content button:hover {
-  background: #444;
-  border-color: #777;
+/* 4) Info text sits right under each button */
+#classSelectionMenu .class-entry p {
+  margin: 0.5rem 0 0;    /* little gap above, flush below */
+  color: #ddd;
+  line-height: 1.4;
+}
+
+#classSelectionMenu .class-entry button:hover {
+  background: #777;                                    /* same hover as other menus */
 }
 
 #playerJobs {
@@ -1805,29 +1811,102 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
         <button class="smallButton" id="standBtn">Stand</button>
       </div>
     </div>
-	
-<div id="classSelectionMenu" class="modal" style="display: none;">
-  <div class="modal-content">
-    <h2>Select Your Class</h2>
-    <button data-class="Swordsman">Swordsman</button>
-	<p>"The most popular choice for beginner warriors. Going with this Class allows greating proficiency with sword-like weapons."<br>+10% Sword Damage<br>-10%  All Other Damage</p>
+
+<div id="classSelectionMenu">
+  <div class="content scrollable">
+	<h2>Select your Fighting Style</h2>
 	<br>
-    <button data-class="Assassin">Assassin</button>
-	<p>"If you wish to go to the path of the silent, but deadly, to finish things in one go, this is your best choice."<br>+20% Dagger Damage<br>+5 Perception<br>+10% Dodge Chance<br>+10% Enemy Damage</p>
+    <div class="class-entry">
+      <button data-class="Swordsman">The Way of the Sword</button>
+	  <br>
+      <p>
+        “The most popular choice for beginner warriors. Going with this Class allows great proficiency with sword-like weapons.”<br>
+        +10% Sword Damage<br>
+        –10% All Other Damage
+      </p>
+    </div>
 	<br>
-    <button data-class="Tank">Tank</button>
-	<p>"If you want to protect, defend, and take blows like a living shield, this is your path."<br>+25% Defense</p>
+    <div class="class-entry">
+      <button data-class="Assassin">The Path of the Assassins</button>
+	  <br>
+      <p>
+        “If you wish to go the path of the silent, but deadly, to finish things in one go, this is your best choice.”<br>
+        +20% Dagger Damage<br>
+        +5 Perception<br>
+        +10% Dodge Chance<br>
+        +10% Enemy Damage
+      </p>
+    </div>
 	<br>
-    <button data-class="Mage">Mage</button>
-	<p>"The second most popular choice for beginner warriors. Going with this Class allows your magic potential and overall prowess to increase greatly."<br>+5% Magic<br>-15% Attack<br>+5% Enemy Damage</p>
+    <div class="class-entry">
+      <button data-class="Berserker">The Way of the Fist</button>
+	  <br>
+      <p>
+        “If you wish to punch, beat and smash your way to victory, you'll wanna go with this.”<br>
+        +25% Fist Damage<br>
+        +10% Gauntlet Damage (Stacks)<br>
+        +5% Defense<br>
+        +5% Agility<br>
+        +5% Perception<br>
+        –10% Damage with anything else
+      </p>
+    </div>
 	<br>
-    <button data-class="Expeditionist">Expeditionist</button>
-	<p>"If you simply want to go around, explore, collect, and research in the wilderness. To become a scientist, journalist, etc., and not a warrior, this is the way to go."<br>+20% Luck<br>+20% Fortune<br>+20% Agility<br>-10% Damage</p>
+    <div class="class-entry">
+      <button data-class="Tank">The Road of the Invincible</button>
+	  <br>
+      <p>
+        “If you want to protect, defend, and take blows like a living shield, this is your path.”<br>
+        +25% Defense
+      </p>
+    </div>
 	<br>
-    <button data-class="All-rounder">All-rounder</button>
-	<p>"A Jack of all trades, no specific role, just do what you want."<br>+2 All Stats</p>
+    <div class="class-entry">
+      <button data-class="Heavy Knight">The Will of the Strong</button>
+	  <br>
+      <p>
+        “If you want to take it slow, and devastate with a single blow, this is your way to go.”<br>
+        +10% Greatsword Damage<br>
+        +10% Hammer Damage<br>
+        +10% Spear Damage<br>
+        +10% Defense<br>
+        –20% Agility
+      </p>
+    </div>
+	<br>
+    <div class="class-entry">
+      <button data-class="Mage">The Way of Magic</button>
+	  <br>
+      <p>
+        “The second most popular choice for beginner warriors. Going with this Class allows your magic potential and overall prowess to increase greatly.”<br>
+        +5% Magic<br>
+        –15% Attack<br>
+        +5% Enemy Damage
+      </p>
+    </div>
+	<br>
+    <div class="class-entry">
+      <button data-class="Expeditionist">The Path of the Curious</button>
+	  <br>
+      <p>
+        “If you simply want to go around, explore, collect, and research in the wilderness. To become a scientist, journalist, etc., and not a warrior, this is what you want to be.”<br>
+        +20% Luck<br>
+        +20% Fortune<br>
+        +20% Agility<br>
+        –10% Damage
+      </p>
+    </div>
+	<br>
+    <div class="class-entry">
+      <button data-class="All-rounder">The Jack of all Trades</button>
+	  <br>
+      <p>
+        “A jack of all trades, no specific role, just do what you want.”<br>
+        +2 All Stats
+      </p>
+    </div>
   </div>
-</div>	
+</div>
 	
 	<div id="guildMenu" class="modal" style="display: none;">
   <div class="modal-content">
@@ -6322,13 +6401,7 @@ document.getElementById("confirmAbilitiesButton").addEventListener("click", func
   document.getElementById("hudPlayerPassive").innerText = player.passiveAbility || "None";
   document.getElementById("hudPlayerActive").innerText = player.activeAbility || "None";
   applyPassiveAbilityEffects();
-  initGame();
-  document.getElementById("gameContainer").style.display = "block";
-  document.getElementById("battleTint").style.display = "none";
-  if (titleMusic) {
-    titleMusic.pause();
-  }
-  titleMusic.currentTime = 0;
+  showClassSelectionMenu();
 });
 
 /*********************
@@ -7455,7 +7528,7 @@ function showGuildApplicationPrompt() {
 	alert("Thank you for applying. Welcome to the Guild!");
 	player.guildUnlocked = true;
 	player.organization = "Guild";
-    showClassSelectionMenu();
+    showGuildMainMenu();
   }
 }
 
@@ -7475,31 +7548,74 @@ function selectClass(cls) {
   player.playerClass = cls;
   applyClassEffects(cls);
   document.getElementById("classSelectionMenu").style.display = "none";
-  showGuildMainMenu();
+  initGame();
+  document.getElementById("gameContainer").style.display = "block";
+  document.getElementById("battleTint").style.display = "none";
+  if (titleMusic) {
+    titleMusic.pause();
+  }
+  titleMusic.currentTime = 0;
   updateStats();
 }
 
 function applyClassEffects(cls) {
-  // (You may want to clear previous buffs first if you store them)
+  const swordNames = ["Sword", "Greatsword", "Excalibur"];
+	const greatSwordName = ["Greatsword"];
+	const daggerNames    = ["Dagger"];
+	const hammerNames    = ["Warhammer"];
+	const spearNames     = ["Spear"];
+	const gauntletNames  = ["Gauntlet"];
+	const w = player.equipment.weapon ? player.equipment.weapon.name : null;
+
   switch (cls) {
+
     case "Swordsman":
-      if (player.equipment.weapon?.type === "sword") {
+      if (w && swordNames.includes(w)) {
+        // +10% with swords
         player.attack = Math.ceil(player.attack * 1.10);
       } else {
+        // -10% with anything else (or no weapon)
         player.attack = Math.ceil(player.attack * 0.90);
       }
       break;
 
     case "Assassin":
-      if (
-        player.equipment.weapon?.type === "dagger" ||
-        player.equipment.accessory?.type === "dagger"
-      ) {
+      if (w && daggerNames.includes(w)) {
+        // +20% with daggers
         player.attack = Math.ceil(player.attack * 1.20);
       }
-      player.perception = Math.ceil(player.perception + 5);
+      player.perception = (player.perception || 0) + 5;
       player.dodgeChance = (player.dodgeChance || 0) + 0.10;
       player.enemyDamageTaken = (player.enemyDamageTaken || 1) * 1.10;
+      break;
+
+    case "Heavy Knight":
+      if (w && (hammerNames.includes(w) || greatSwordName.includes(w) || spearNames.includes(w))) {
+        // +10% with warhammer, greatsword, spear
+        player.attack = Math.ceil(player.attack * 1.10);
+      } else {
+        // -10% with any other
+        player.attack = Math.ceil(player.attack * 0.90);
+      }
+      player.defense = Math.ceil(player.defense * 1.10);
+      player.agility = Math.ceil(player.agility * 0.80); // -20%
+      break;
+
+    case "Berserker":
+      if (!w) {
+        // +25% with no weapon
+        player.attack = Math.ceil(player.attack * 1.25);
+      } else if (gauntletNames.includes(w)) {
+        // +15% with gauntlets
+        player.attack = Math.ceil(player.attack * 1.375);
+      } else {
+        // -10% with any other weapon
+        player.attack = Math.ceil(player.attack * 0.90);
+      }
+      player.defense    = Math.ceil(player.defense    * 1.05);
+      player.perception = (player.perception || 0) + 5;
+      player.agility    = Math.ceil(player.agility    * 1.05);
+      player.magic      = Math.ceil(player.magic      * 0.90);
       break;
 
     case "Tank":
@@ -7517,6 +7633,7 @@ function applyClassEffects(cls) {
       player.luck    = Math.ceil(player.luck    * 1.20);
       player.agility = Math.ceil(player.agility * 1.20);
       player.attack  = Math.ceil(player.attack  * 0.90);
+	  player.magic   = Math.ceil(player.magic  * 0.90);
       break;
 
     case "All-rounder":
