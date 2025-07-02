@@ -1984,6 +1984,8 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 					<br>
 					<li><em><strong>Gauntlets</strong>: </em>The gauntlets are modified gloves with armored plating, allowing Warriors, especially of the Berserker Attribute, to go ham in close combat. They cost $320 to buy in shops.</li>
 					<br>
+					<li><em><strong>Ball & Chain</strong>: </em>The ball & chain, a medieval-type weapon that has regained usage after a few modifications. By swinging it around, warriors can utilize momentum to destroy anything that gets in the mace ball's way. They cost $500 to buy in shops.</li>
+					<br>
 					<li><em><strong>Warhammer</strong>: </em>The warhammer is by far the most heavy, and devastating weapon built by mankind. A two-handed weapon that, with a single swing, can take out multiple enemies at once! They cost $500 to buy in shops.</li>
 					<br>
 					<li><em><strong>Shield</strong>: </em>The shield is a must-have on a Warrior's arsenal, allowing Warriors to block, defend, protect, or bash their way through foes. They cost $400 to buy in shops.</li>
@@ -2064,7 +2066,15 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 		<br><br><br> 
 		<strong>Chapter 2 - Effect</strong> 
 		<br><br>
-		Humanity panicked, society went into chaos. Scientist quickly began rushing to build spaceships to fly us all out of here, but it only resulted in failure, as the worldwide economy crashed down on itself. Every government in the world also began crashing down, the military began blindly launching missiles in the sky as if it would do something, backfiring horribly as it all launched back down on other countries. The world fell into a huge war, destroying itself, slowly but surely. 
+		Humanity panicked, society went into chaos. Humanity's technology advanced to greater heights than it ever did, as the governments and scientists all around the world allied and worked together to build spaceships to fly us all out of here, engineers built bunkers, shelters, and new world-threatening weapons such as gigantic mech suits to try and fight back against the god if they ever did decide to attack but it only resulted in failure, as the worldwide economy crashed down on itself.
+		<br><br>
+		Every government in the world also began crashing down, their militaries began blindly launching missiles in the sky as if it would do something, backfiring horribly as it all launched back down on other countries. The world alliance fell apart as the world fell into a huge war, destroying itself, slowly but surely. 
+		<br><br>
+		Missiles fired on every piece of land that it could possibly aim at. The gigantic mechs that was once built to fight back against the gods were now wrestling with each other or destroying entire cities. The superweapons were used in war as if they were just another weapon in a country's arsenal. It was an all-out nuclear war... no, it was more than that.
+		<br><br><br>
+		It was Ragnarok.
+		<br><br><br>
+		Chapter 3 - Realization
 		<br><br>
 		5 years into the war, the world realized, 5 years passed after the gods appeared, yet, nothing happened. Were we played? Were we fooled? Is this their form of judgement? 
 		<br><br>
@@ -2072,7 +2082,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 		<br><br>
 		However, the damage was done, the planet was in ruins, and it would take 1000 years to bring it all back. The modern era was over...
 		<br><br><br> 
-		<strong>Chapter 3 - Aftershock</strong> 
+		<strong>Chapter 4 - Aftershock</strong> 
 		<br><br>
 		A decade passed since the war, humanity tries to put itself back together, thinking the problem was over, as the gods that appeared all those years ago have not made a single move since then. <br><br>However, just when humanity though they were back in the game. Boom. The gods reappeared, saying, 
 		<br><br>
@@ -2094,7 +2104,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 		<br><br>
 		Humanity was back, in fact, humans got so strong, and were killing the monsters faster than we could ever imagine, the worldwide monster population fell by 5% in 2 weeks. 
 		<br><br><br>
-		<strong>Chapter 4 - Monsters</strong>
+		<strong>Chapter 5 - Monsters</strong>
 		<br><br>
 		However, the gods didn't just idle around, watching this all go down. We passed our second trial, as the gods quickly began the third. The gods made the monsters evolve exactly as animals do. The monsters grew reproductive organs, they gained sentience, and they evolved, at a matching rate as the humans did. 
 		<br><br>
@@ -2102,7 +2112,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 		<br><br>
 		And all that, leads to where we are now. The planet was named Valrr by the new governments, who were once kids that loved playing the video games that we managed to salvage from the Modern era, and thought that it sounded like a fantasy game, and it was named after the word, valor, to encourage, motivate and inspire the warriors who fight for us against the monsters.
 		<br><br><br><br>
-		Legends state that someday, an entity from a world beyond our own will appear and save us from all the monsters, become stronger than anything our world has ever seen, fight back against the gods that have damned us all, and finally free us from this eternal torture that they call "Trials".
+		Legend states that someday, an entity from a world beyond our own will appear and save us from all the monsters, become stronger than anything our world has ever seen, fight back against the gods that have damned us all, and finally free us from this eternal torture that they call "Trials".
 		<br><br><br><br>
 		<h2><strong>-END-</strong></h2>
 	  </div>
@@ -2257,6 +2267,19 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 		<strong>Threat Level</strong>: ☆☆☆
 		<br>
 		<strong>Resistance/s</strong>: None
+		<br>
+		<br>
+		<strong>Name</strong>: Mimic
+		<br>
+		<strong>Domain/s</strong>: Everywhere in Loot rooms
+		<br>
+		<strong>Durability</strong>: ☆☆☆☆
+		<br>
+		<strong>Threat Level</strong>: ☆☆☆☆
+		<br>
+		<strong>Resistance/s</strong>: None
+		<br>
+		<strong>Note</strong>: Mimics may randomly appear in Loot rooms, possessing treasure chests or other container-type objects.
 		<br>
 		<br>
 		<strong>Name</strong>: Monster Crow
@@ -3366,6 +3389,11 @@ casinoMusic.loop = true;
     p.defense = Math.ceil(p.defense * 1.67);
 	p.maxArmor += 15;
     p.agility = p.agility - 15;
+  },
+  "Ball & Chain": p => {
+    p.attack = Math.ceil(p.attack * 2.5);
+	p.defense = Math.ceil(p.defense * 1.2);
+    p.agility = p.agility - 10;
   },
   "Dagger":     p => {
     p.attack = Math.ceil(p.attack * 1.33);
@@ -5827,6 +5855,16 @@ let shopItemsList = [
 	description: "Extremely heavy, but very powerful, allowing you to smash foes to bits.",
   },
   {
+    name: "Ball & Chain",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "A heavy, but strong weapon, allowing you to swing around and obliterate with momentum.",
+  },
+  {
     name: "Spear",
     cost: 360,
     type: "equipment",
@@ -6163,6 +6201,16 @@ shopItemsList = [
     usableOutOfBattle: false,
     usageScope: "passive",
 	description: "An attachment to the Slayer's armor and weapons, allowing more versatility in battle.",
+  },
+  {
+    name: "Ball & Chain",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "A heavy, but strong weapon, allowing you to swing around and obliterate with momentum.",
   },
   {
     name: "Sentinel Hammer",
@@ -6872,6 +6920,22 @@ function generateAdjacentRooms(cx, cy) {
 			unlockActions();
 		}, 125);
 	  }
+
+const mimicTemplate = {
+  name: "Mimic",
+  hp: 65500,
+  damageRange: [70, 90],
+  expReward: [500, 500],
+  moneyReward: [500, 500],
+  reductionAll: 0,
+  poison: false,
+  frozen: 0,
+  burned: false,
+  weaken: false,
+  paralyzed: false,
+  asleep: 0,
+  boss: false
+};
 	  
 	  const baseItemChance = 0.5;
 	  const itemChance = Math.min(0.9, baseItemChance + player.luck * 0.001);
@@ -7428,7 +7492,20 @@ function applyPlayerStatus(type, duration = null) {
 		startAmbushBattle(() => finalizeRoom(key));
 		return;
   } else if (map[key].type === ROOM_TYPES.LOOT) {
+    if (Math.random() < 0.05) {
+    alert("A treasure chest turned out to be a Mimic!");
+    ambushEnemiesQueue = [ JSON.parse(JSON.stringify(mimicTemplate)) ];
+    ambushCompleteCallback = () => {
+      alert("You have defeated the Mimic!");
+      handleLootRoom();
+      finalizeRoom(key);
+    };
+    // kick off the fight
+    startNextAmbush();
+    return;
+  } else {
     handleLootRoom();
+  }
   } else if (map[key].type === ROOM_TYPES.TRAP) {
     handleTrapRoom();
   }
