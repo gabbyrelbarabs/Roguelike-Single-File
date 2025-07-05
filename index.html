@@ -1870,6 +1870,9 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
         +10% Greatsword Damage<br>
         +10% Hammer Damage<br>
         +10% Spear Damage<br>
+		+10% Mace Damage<br>
+		+10% Ball & Chain Damage<br>
+		+10% Axe Damage<br>
         +10% Defense<br>
         –20% Agility
       </p>
@@ -1985,6 +1988,10 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 					<li><em><strong>Gauntlets</strong>: </em>The gauntlets are modified gloves with armored plating, allowing Warriors, especially of the Berserker Attribute, to go ham in close combat. They cost $320 to buy in shops.</li>
 					<br>
 					<li><em><strong>Ball & Chain</strong>: </em>The ball & chain, a medieval-type weapon that has regained usage after a few modifications. By swinging it around, warriors can utilize momentum to destroy anything that gets in the mace ball's way. They cost $500 to buy in shops.</li>
+					<br>
+					<li><em><strong>Mace</strong>: </em>Another weapon from the medieval times, with its heavy, spiked head, it can deal devastating damage. Great against huge, slow enemies, as they're the only ones that can match your pace with this weapon. This costs $500 to buy in shops.</li>
+					<br>
+					<li><em><strong>Battle Axe</strong>: </em>Yet another medieval weapon. From a simple woodcutting axe, given an extra blade on the other side, it has regained usage after proven efficiency against groups of monsters, slashing multiple by simply swinging it around. They cost $500 to buy in shops.</li>
 					<br>
 					<li><em><strong>Warhammer</strong>: </em>The warhammer is by far the most heavy, and devastating weapon built by mankind. A two-handed weapon that, with a single swing, can take out multiple enemies at once! They cost $500 to buy in shops.</li>
 					<br>
@@ -3386,6 +3393,14 @@ casinoMusic.loop = true;
     p.attack = Math.ceil(p.attack * 2.5);
 	p.defense = Math.ceil(p.defense * 1.2);
     p.agility = p.agility - 10;
+  },
+  "Battle Axe": p => {
+    p.attack = p.attack * 2;
+  },
+  "Mace": p => {
+    p.attack = p.attack * 4;
+	p.defense = Math.ceil(p.defense * 2);
+	p.agility = -999;
   },
   "Dagger":     p => {
     p.attack = Math.ceil(p.attack * 1.33);
@@ -5857,6 +5872,26 @@ let shopItemsList = [
 	description: "A heavy, but strong weapon, allowing you to swing around and obliterate with momentum.",
   },
   {
+    name: "Mace",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "The heaviest weapon by its head alone. A single swing should be enough to crush an ogre's head.",
+  },
+  {
+    name: "Battle Axe",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "A deadly, double sided axe used in medieval warfare, now reused for its proficiency in group combat when swung.",
+  },
+  {
     name: "Spear",
     cost: 360,
     type: "equipment",
@@ -6203,6 +6238,26 @@ shopItemsList = [
     usableOutOfBattle: false,
     usageScope: "passive",
 	description: "A heavy, but strong weapon, allowing you to swing around and obliterate with momentum.",
+  },
+  {
+    name: "Mace",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "The heaviest weapon by its head alone. A single swing should be enough to crush an ogre's head.",
+  },
+  {
+    name: "Battle Axe",
+    cost: 500,
+    type: "equipment",
+    category: "weapon",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "A deadly, double sided axe used in medieval warfare, now reused for its proficiency in group combat when swung.",
   },
   {
     name: "Sentinel Hammer",
@@ -7629,81 +7684,83 @@ function selectClass(cls) {
 }
 
 function applyClassEffects(cls) {
-  const swordNames = ["Sword", "Greatsword", "Excalibur"];
+	const swordNames = ["Sword", "Greatsword", "Excalibur"];
 	const greatSwordName = ["Greatsword"];
 	const daggerNames    = ["Dagger"];
 	const hammerNames    = ["Warhammer"];
 	const spearNames     = ["Spear"];
+	const ballNames      = ["Ball & Chain"];
+	const axeNames       = ["Battle Axe"];
+	const maceNames      = ["Mace"];
 	const gauntletNames  = ["Gauntlets"];
 	const w = player.equipment.weapon ? player.equipment.weapon.name : null;
-
+	
   switch (cls) {
-
     case "Swordsman":
       if (w && swordNames.includes(w)) {
         // +10% with swords
-        player.attack = Math.ceil(player.attack * 1.10);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.10);
       } else {
         // -10% with anything else (or no weapon)
-        player.attack = Math.ceil(player.attack * 0.90);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 0.90);
       }
       break;
 
     case "Assassin":
       if (w && daggerNames.includes(w)) {
         // +20% with daggers
-        player.attack = Math.ceil(player.attack * 1.20);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.20);
       }
-      player.perception = (player.perception || 0) + 5;
-      player.dodgeChance = (player.dodgeChance || 0) + 0.10;
-      player.enemyDamageTaken = (player.enemyDamageTaken || 1) * 1.10;
+      player.baseStats.perception = (player.baseStats.perception || 0) + 5;
+      player.baseStats.dodgeChance = (player.baseStats.dodgeChance || 0) + 0.10;
+      player.baseStats.enemyDamageTaken = (player.baseStats.enemyDamageTaken || 1) * 1.10;
       break;
 
     case "Heavy Knight":
-      if (w && (hammerNames.includes(w) || greatSwordName.includes(w) || spearNames.includes(w))) {
+      if (w && (hammerNames.includes(w) || greatSwordName.includes(w) || spearNames.includes(w) || maceNames.includes(w) || axeNames.includes(w) || ballNames.includes(w))) {
         // +10% with warhammer, greatsword, spear
-        player.attack = Math.ceil(player.attack * 1.10);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.10);
       } else {
         // -10% with any other
-        player.attack = Math.ceil(player.attack * 0.90);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 0.90);
       }
-      player.defense = Math.ceil(player.defense * 1.10);
-      player.agility = Math.ceil(player.agility * 0.80); // -20%
+      player.baseStats.defense = Math.ceil(player.baseStats.defense * 1.10);
+      player.baseStats.agility = Math.ceil(player.baseStats.agility * 0.80); // -20%
       break;
 
     case "Berserker":
       if (!w) {
         // +25% with no weapon
-        player.attack = Math.ceil(player.attack * 1.25);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.25);
       } else if (gauntletNames.includes(w)) {
         // +15% with gauntlets
-        player.attack = Math.ceil(player.attack * 1.375);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.375);
       } else {
         // -10% with any other weapon
-        player.attack = Math.ceil(player.attack * 0.90);
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 0.90);
       }
-      player.defense    = Math.ceil(player.defense    * 1.05);
-      player.perception = (player.perception || 0) + 5;
-      player.agility    = Math.ceil(player.agility    * 1.05);
-      player.magic      = Math.ceil(player.magic      * 0.90);
+      player.baseStats.defense    = Math.ceil(player.baseStats.defense    * 1.05);
+      player.baseStats.perception = (player.baseStats.perception || 0) + 5;
+      player.baseStats.agility    = Math.ceil(player.baseStats.agility    * 1.05);
+      player.baseStats.magic      = Math.ceil(player.baseStats.magic      * 0.90);
       break;
 
     case "Tank":
-      player.defense = Math.ceil(player.defense * 1.25);
+      player.baseStats.defense = Math.ceil(player.baseStats.defense * 1.25);
       break;
 
     case "Mage":
-      player.magic = Math.ceil(player.magic * 1.05);
-      player.attack = Math.ceil(player.attack * 0.85);
-      player.enemyDamageTaken = (player.enemyDamageTaken || 1) * 1.05;
+      player.baseStats.magic = Math.ceil(player.baseStats.magic * 1.05);
+      player.baseStats.attack = Math.ceil(player.baseStats.attack * 0.85);
+      player.baseStats.enemyDamageTaken = (player.baseStats.enemyDamageTaken || 1) * 1.05;
       break;
 
     case "Expeditionist":
-      player.fortune = Math.ceil(player.fortune * 1.20);
-      player.luck    = Math.ceil(player.luck    * 1.20);
-      player.agility = Math.ceil(player.agility * 1.20);
-      player.attack  = Math.ceil(player.attack  * 0.90);
-	  player.magic   = Math.ceil(player.magic  * 0.90);
+      player.baseStats.fortune = Math.ceil(player.baseStats.fortune * 1.20);
+      player.baseStats.luck    = Math.ceil(player.baseStats.luck    * 1.20);
+      player.baseStats.agility = Math.ceil(player.baseStats.agility * 1.20);
+      player.baseStats.attack  = Math.ceil(player.baseStats.attack  * 0.90);
+	  player.baseStats.magic   = Math.ceil(player.baseStats.magic  * 0.90);
       break;
 
     case "All-rounder":
@@ -7712,7 +7769,7 @@ function applyClassEffects(cls) {
         "agility","perception","potential",
         "luck",   "fortune"
       ].forEach(stat => {
-        player[stat] = Math.ceil(player[stat] + 2);
+        player.baseStats[stat] = Math.ceil(player.baseStats[stat] + 2);
       });
       break;
 
