@@ -98,10 +98,8 @@
 }
 
 #difficultyMenu button {
-  color: white;
   font-weight: bold;
   padding: 0.5em 1em;
-  border: 1px solid white;
   border-radius: 4px;
   margin: 0.25em;
   cursor: pointer;
@@ -109,42 +107,51 @@
 
 #normalBtn {
   background-color: gray;
-  color: black;
+  color: #ffffff;
+  border: 1px solid white;
 }
 
 #hardBtn {
   background-color: orange;
-  color: black;
+  color: #ffffff;
+  border: 1px solid white;
 }
 
 #extremeBtn {
   background-color: red;
-  color: black;
+  color: #ffffff;
+  border: 1px solid white;
 }
 
 #insaneBtn {
   background-color: #700000;
-  color: black;
+  color: #000000;
+  border: 1px solid gray;
 }
 
 #calamityBtn {
   background-color: black;
-  color: red;
+  color: #ff0000;
+  border: 1px solid #ff0000;
 }
 
 #bossRushBtn {
   background-color: blue;
-  color: white;
+  color: #ffffff;
+  border: 1px solid white;
 }
 
 #doomBtn {
   background-color: #2e0000;
+  color: white;
+  border: 1px solid white;
   width: 50px;
 }
 
 #ultimateBtn {
   background-color: #f4ff57;
-  color: white;
+  color: #e6b800;
+  border: 1px solid #f4ff57;
 }
 
 #difficultyMenu button:hover {
@@ -1981,6 +1988,8 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 					<br>
 					<li><em><strong>Dagger</strong>: </em>The dagger is a small blade meant for easy-weilding. Light, yet sharp, it's perfect for agile warriors. They cost $320 to buy in shops.</li>
 					<br>
+					<li><em><strong>Hatchet</strong>: </em>The hatchet is basically a smaller axe, meant for lighter work compared to a normal axe. Also due to their light weight, they are perfect for warriors who wish to be fast, but still deal heavy damage. They cost $360 to buy in shops.</li>
+					<br>
 					<li><em><strong>Spear</strong>: </em>The spear is a heavy weapon made for attack-type warriors. With precision, this weapon allows the user to hit targets from a distance with immaculate accuracy. They cost $360 to buy in shops.</li>
 					<br>
 					<li><em><strong>Greatword</strong>: </em>A powerful, but heavy weapon. This weapon was made for devastation, but makes the warrior's severely slower than others. They cost $360 to buy in shops.</li>
@@ -3406,6 +3415,10 @@ casinoMusic.loop = true;
     p.attack = Math.ceil(p.attack * 1.33);
     p.agility = Math.ceil(p.agility * 1.5);
     p.perception = Math.ceil(p.perception * 1.5);
+  },
+  "Hatchets":     p => {
+    p.attack = Math.ceil(p.attack * 1.4);
+    p.perception = Math.ceil(p.perception * 1.67);
   },
   "Spear":      p => {
     p.attack = p.attack * 2;
@@ -5842,6 +5855,16 @@ let shopItemsList = [
 	description: "A lightweight, efficient weapon that can be dual-wielded. Great for fast kills.",
   },
   {
+    name: "Hatchets",
+    cost: 360,
+    type: "equipment",
+    category: "dual-wieldable",
+    usableInBattle: false,
+    usableOutOfBattle: false,
+    usageScope: "passive",
+	description: "A small, light, throwable axe used for maximum range and damage. May be a bit difficult to handle.",
+  },
+  {
     name: "Greatsword",
     cost: 360,
     type: "equipment",
@@ -6725,6 +6748,8 @@ function resumeWorldMusicAfterBattle() {
   }
 }
 
+const bossInterval = (gameDifficulty === "doom" ? 50 : gameDifficulty === "bossrush" ? BOSS_RUSH_INTERVAL : 20);
+
       /*******************
        * ROOM FUNCTIONS
        *******************/
@@ -6814,7 +6839,6 @@ function generateAdjacentRooms(cx, cy) {
   
   // === Boss Rush mode: only Altars, Shops, Loots & Bosses ===
   if (gameDifficulty === "bossRush") {
-    const bossInterval = 3;
     if (floorCount % bossInterval === 0 && !bossRoomGenerated) {
       // spawn the boss room straight ahead
       const bossPos = { x: cx, y: cy - 1 };
@@ -6836,8 +6860,6 @@ function generateAdjacentRooms(cx, cy) {
     return; // skip the default generator
   }
 
-  // Boss every N floors (20 normally, 50 in Doom)
-  const bossInterval = (gameDifficulty === "doom" ? 50 : gameDifficulty === "bossrush" ? BOSS_RUSH_INTERVAL : 20);
   if (floorCount % bossInterval === 0 && !bossRoomGenerated) {
     const bossPos = { x: cx, y: cy - 1 };
     createRoom(bossPos.x, bossPos.y, ROOM_TYPES.BOSS);
@@ -7685,13 +7707,8 @@ function selectClass(cls) {
 
 function applyClassEffects(cls) {
 	const swordNames = ["Sword", "Greatsword", "Excalibur"];
-	const greatSwordName = ["Greatsword"];
-	const daggerNames    = ["Dagger"];
-	const hammerNames    = ["Warhammer"];
-	const spearNames     = ["Spear"];
-	const ballNames      = ["Ball & Chain"];
-	const axeNames       = ["Battle Axe"];
-	const maceNames      = ["Mace"];
+	const heavyNames = ["Greatsword", "Warhammer", "Spear", "Ball & Chain", "Battle Axe", "Mace"];
+	const assassinNames = ["Dagger", "Hatchets"];
 	const gauntletNames  = ["Gauntlets"];
 	const w = player.equipment.weapon ? player.equipment.weapon.name : null;
 	
@@ -7707,7 +7724,7 @@ function applyClassEffects(cls) {
       break;
 
     case "Assassin":
-      if (w && daggerNames.includes(w)) {
+      if (w && assassinNames.includes(w)) {
         // +20% with daggers
         player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.20);
       }
@@ -7717,7 +7734,7 @@ function applyClassEffects(cls) {
       break;
 
     case "Heavy Knight":
-      if (w && (hammerNames.includes(w) || greatSwordName.includes(w) || spearNames.includes(w) || maceNames.includes(w) || axeNames.includes(w) || ballNames.includes(w))) {
+      if (w && heavyNames.includes(w)) {
         // +10% with warhammer, greatsword, spear
         player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.10);
       } else {
@@ -7732,7 +7749,7 @@ function applyClassEffects(cls) {
       if (!w) {
         // +25% with no weapon
         player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.25);
-      } else if (gauntletNames.includes(w)) {
+      } else if (w && gauntletNames.includes(w)) {
         // +15% with gauntlets
         player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.375);
       } else {
