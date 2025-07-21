@@ -1889,6 +1889,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
       <p>
         “If you want to protect, defend, and take blows like a living shield, this is your path.”<br>
         +25% Defense
+		+5% Armor Bonus
       </p>
     </div>
 	<br>
@@ -7814,6 +7815,9 @@ function applyClassEffects(cls) {
       break;
 
     case "Tank":
+	  if (player.equipment.armor) {
+		player.defense = Math.ceil(player.defense * 1.05);
+	  }
       player.baseStats.defense = Math.ceil(player.baseStats.defense * 1.25);
       break;
 
@@ -11391,7 +11395,7 @@ document.getElementById("abilityBtn").addEventListener("click", () => {
   hitButtons.forEach(btn => {
     btn.style.display = "";   // back to whatever your CSS says
   });
-  stopWorldMusic()
+  stopWorldMusic();
   casinoMusic.play();
   casinoPlayerTotal = 0;
   casinoEnemyTotal = 0;
@@ -11402,25 +11406,36 @@ document.getElementById("abilityBtn").addEventListener("click", () => {
   casinoMenu.style.display = "block";
   battleTint.style.display = "block";
 }
+
+placeBetBtn.onclick = () => {
+  const bet = parseInt(betInput.value, 10);
+  if (isNaN(bet) || bet < 1) {
+    alert("Please enter a valid bet amount.");
+    return;
+  }
+  if (bet > player.money) {
+    alert("You cannot bet more than you have!");
+    return;
+  }
+  casinoBet = bet * Math.round(1 + player.fortune * 0.08);
+
+  casinoGameArea.style.display = "block";
+  updateStats();
+};
 	  
-	  function finalizeCasinoRound() {
-  // Calculate the absolute difference from 21 for both player and enemy
+function finalizeCasinoRound() {
   const playerDiff = Math.abs(21 - casinoPlayerTotal);
   const enemyDiff = Math.abs(21 - casinoEnemyTotal);
   let outcome;
-  // Decide outcome based on totals.
-  // If both bust (over 21), choose the one closer to 21.
   if (casinoPlayerTotal >= 21 && casinoEnemyTotal >= 21) {
     outcome = playerDiff < enemyDiff ? "win" : (playerDiff > enemyDiff ? "lose" : "push");
   } 
-  // If only one of them is over 21, then that side loses.
   else if (casinoPlayerTotal >= 21) {
     outcome = "lose";
   } 
   else if (casinoEnemyTotal >= 21) {
     outcome = "win";
   }
-  // If neither busted, compare closeness.
   else {
     outcome = playerDiff < enemyDiff ? "win" : (playerDiff > enemyDiff ? "lose" : "push");
   }
@@ -11461,6 +11476,7 @@ document.getElementById("abilityBtn").addEventListener("click", () => {
         casinoBet = bet * Math.round(1 + player.fortune * 0.08);
         casinoGameArea.style.display = "block";
       });
+	  
       hitButtons.forEach((btn) => {
   btn.addEventListener("click", function onHit() {
     // Hide this hit button once pressed.
@@ -11474,13 +11490,13 @@ document.getElementById("abilityBtn").addEventListener("click", () => {
     // If player's total exceeds 21 immediately, handle bust.
     if (casinoPlayerTotal >= 21) {
       alert("It's a bust! You lost.");
-      concludeCasinoGame(true);
+      finalizeCasinoRound(true);
       return;
     }
 
 	if (casinoEnemyTotal >= 21) {
         alert("Dealer had a bust! They lost.");
-        concludeCasinoGame();
+        finalizeCasinoRound();
         return;
       }
     
@@ -11493,7 +11509,7 @@ document.getElementById("abilityBtn").addEventListener("click", () => {
       // If the dealer’s total goes over 21 immediately, win for the player.
       if (casinoEnemyTotal >= 21) {
         alert("Dealer had a bust! They lost.");
-        concludeCasinoGame();
+        finalizeCasinoRound();
         return;
       }
     }
@@ -11513,78 +11529,10 @@ document.getElementById("abilityBtn").addEventListener("click", () => {
           casinoEnemyTotal += enemyCard;
         }
         casinoEnemyTotalEl.textContent = casinoEnemyTotal;
-        concludeCasinoGame();
-      });
-      hitButtons.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          playerHit();
-        });
-      });
-      // Modify the stand button event.
-      standBtn.addEventListener("click", () => {
-        while (casinoEnemyTotal < 17) {
-          const enemyCard = Math.floor(Math.random() * 13) + 1;
-          casinoEnemyTotal += enemyCard;
-        }
-        casinoEnemyTotalEl.textContent = casinoEnemyTotal;
-        concludeCasinoGame();
+        finalizeCasinoRound();
       });
 
-      function concludeCasinoGame(forcedLoss = false) {
-        if (casinoPlayerTotal === 0) {
-          alert("Your total is 0 – Penalty!");
-          playerHit();
-          return;
-        }
-        let playerBust = casinoPlayerTotal >= 21;
-        let enemyBust = casinoEnemyTotal >= 21;
-        let outcome;
-        if (forcedLoss || playerBust) {
-          outcome = "lose";
-        } else if (enemyBust) {
-          outcome = "win";
-        } else {
-          let bonus = hasItem("Dice") ? 2 : 0;
-          let effectivePlayerTotal = Math.max(casinoPlayerTotal - bonus, 0);
-          let playerDiff = 21 - effectivePlayerTotal;
-          let enemyDiff = 21 - casinoEnemyTotal;
-          if (playerDiff < 0) playerDiff = Infinity;
-          if (enemyDiff < 0) enemyDiff = Infinity;
-          if (playerDiff < enemyDiff) {
-            outcome = "win";
-          } else if (enemyDiff < playerDiff) {
-            outcome = "lose";
-          } else {
-            outcome = "push";
-          }
-        }
-        if (outcome === "win") {
-          player.money += casinoBet;
-          alert("You win! Gained $" + casinoBet);
-        } else if (outcome === "lose") {
-          player.money -= casinoBet;
-          alert("You lose! Lost $" + casinoBet);
-          if (player.money <= 0) {
-            alert("You have run out of money and must leave the casino.");
-          }
-        } else {
-          alert("Push! No money won or lost.");
-        }
-        updateStats();
-        casinoMenu.style.display = "none";
-		battleTint.style.display = "none";
-		if (casinoCompleteCallback) {
-    const cb = casinoCompleteCallback;
-	casinoMusic.pause();
-	casinoMusic.currentTime = 0;
-    casinoCompleteCallback = null;
-    cb();
-  }
-casinoMusic.pause();
-casinoMusic.currentTime = 0;
-      }
-	  
-	  function handleTrapRoom() {
+function handleTrapRoom() {
   // 67% chance it doesn’t go off
   if (Math.random() < 0.67) {
     alert("You sense something's off… but nothing happens.");
