@@ -1851,7 +1851,9 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
       <button data-class="Hunter">Hunter</button>
 	  <br>
       <p>
-        “If you wish simply wish to hunt, to prey on the weak and earn from it, then you'll want to be a Hunter.”<br>
+        “If you wish simply wish to hunt, to prey on the weak from afar and earn from it, then you'll want to be a Hunter.”<br>
+		+10% Bow Damage<br>
+		+10% Hatchet Damage<br>
         +20% Perception<br>
 		+10% Fortune<br>
 		+10% Luck
@@ -2091,7 +2093,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 		<ul>
 			<li><em><strong>Swordsman</strong></em> - When warriors select this Class, they're known to be much more proficient and be much stronger with swords. However, warriors of the Swordsman Class tend to ONLY want to use swords. If a warrior of the Swordsman Class were to use any other form of offense, they would be known to be much weaker and completely inexperienced even if they knew how to use that before.</li>
 			<li><em><strong>Assassin</strong></em> - Warriors of this Class tend to become more silent once chosen. With their physical agility, senses and instincts being significantly boosted as it's effect, Assassin Class warriors can basically never be caught as long as they can finish their target before they know it, which is another behavioral effect on them as they would now want to finish things in one go. Assassin Class warriors also tend to be more proficient with lightweight weapons due to their handiness, "pocket-size" and versatility to be used in any situation.</li>
-			<li><em><strong>Hunter</strong></em> - Hunter Class warriors, they kill monsters and travel around wherever. However, they don't do this to protect, they don't do this to explore and learn more about the world. No. They do this for their own personal gain and pleasure, for the EXP, the Dollars, and the overall materials that monsters drop, to then be sold or traded for whatever these warriors want.</li>
+			<li><em><strong>Hunter</strong></em> - Hunter Class warriors, they kill monsters and travel around wherever. However, they don't do this to protect, they don't do this to explore and learn more about the world. No. They do this for their own personal gain and pleasure, for the EXP, the Dollars, and the overall materials that monsters drop, to then be sold or traded for whatever these warriors want. With an aptitude for striking from afar, sniping, and overall ranged combat, they truly are unmatched predators.</li>
 			<li><em><strong>Speedster</strong></em> - These warriors are known to become more active, more energetic once their Class is selected. As if they have caffeine constantly flowing through their veins, Speedster Class warriors never tire and are known to be faster and more agile than everyone else, utilizing their speed to become untouchable. However, because of the amount of energy constantly running in them (literally), Speedster Class warriors are known to be more risky and lose their life earlier than other Classes.</li>
 			<li><em><strong>Berserker</strong></em> - The Berserker Class warriors, probably considered to be the most menacing type due to their immense strength even without weapons. Berserker Class warriors are usually of the Berserker-attribute (obviously), utilizing their extra strength to their fullest to take on foes in close combat. Though fearless, tough and indomitable, they tend to become the arrogant type, easily losing their temper, and also fail to solve problems without using their fist. They're also known to straight up suck in using anything other than their hands.</li>
 			<li><em><strong>Tank</strong></em> - The Tank Class warriors, absolute titans in the world of Valrr. Usually Tough-attributed warriors, they are capable of going into battle to protect allies from powerful attacks, and leave said battles without taking as much as a scratch.</li>
@@ -7723,15 +7725,12 @@ function showGuildApplicationPrompt() {
 function showClassSelectionMenu() {
   player.organization = "Guild";
   const menu = document.getElementById("classSelectionMenu");
-  if (!menu) return console.error("No #classSelectionMenu in HTML!");
-  console.log("📢 Opening Class Selection Menu");
   menu.style.display = "flex";
   battleTint.style.display = "block";
 }
 
 // 2) Global inline handler from each button:
 function selectClass(cls) {
-  console.log("📢 selectClass() got:", cls);
   player.playerClass = cls;
   applyClassEffects(cls);
   document.getElementById("classSelectionMenu").style.display = "none";
@@ -7749,6 +7748,7 @@ function applyClassEffects(cls) {
 	const swordNames = ["Sword", "Greatsword", "Excalibur"];
 	const heavyNames = ["Greatsword", "Warhammer", "Spear", "Ball & Chain", "Battle Axe", "Mace"];
 	const assassinNames = ["Dagger", "Hatchets"];
+	const hunterNames = ["Bow", "Hatchets"];
 	const gauntletNames  = ["Gauntlets"];
 	const w = player.equipment.weapon ? player.equipment.weapon.name : null;
 	
@@ -7774,6 +7774,9 @@ function applyClassEffects(cls) {
       break;
 	
 	case "Hunter":
+	  if (w && hunterNames.includes(w)) {
+        player.baseStats.attack = Math.ceil(player.baseStats.attack * 1.10);
+      }
       player.baseStats.perception = Math.ceil(player.baseStats.perception * 1.20)
       player.baseStats.fortune = Math.ceil(player.baseStats.fortune * 1.10);
       player.baseStats.luck    = Math.ceil(player.baseStats.luck    * 1.10);
@@ -7844,9 +7847,6 @@ function applyClassEffects(cls) {
         player.baseStats[stat] = Math.ceil(player.baseStats[stat] + 2);
       });
       break;
-
-    default:
-      console.warn("Unknown class:", cls);
   }
 }
 
