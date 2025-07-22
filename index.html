@@ -1904,7 +1904,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
         +10% Hammer Damage<br>
         +10% Spear Damage<br>
 		+10% Mace Damage<br>
-		+10% Ball & Chain Damage<br>
+		+10% Flail Damage<br>
 		+10% Axe Damage<br>
         +10% Defense<br>
         –20% Agility
@@ -2022,7 +2022,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 					<br>
 					<li><em><strong>Gauntlets</strong>: </em>The gauntlets are modified gloves with armored plating, allowing Warriors, especially of the Berserker Attribute, to go ham in close combat. They cost $320 to buy in shops.</li>
 					<br>
-					<li><em><strong>Ball & Chain</strong>: </em>The ball & chain, a medieval-type weapon that has regained usage after a few modifications. By swinging it around, warriors can utilize momentum to destroy anything that gets in the mace ball's way. They cost $500 to buy in shops.</li>
+					<li><em><strong>Flail</strong>: </em>The flail, a medieval-type, ball & chain weapon that has regained usage after a few modifications. By swinging it around, warriors can utilize momentum to destroy anything that gets in the mace ball's way. They cost $500 to buy in shops.</li>
 					<br>
 					<li><em><strong>Mace</strong>: </em>Another weapon from the medieval times, with its heavy, spiked head, it can deal devastating damage. Great against huge, slow enemies, as they're the only ones that can match your pace with this weapon. This costs $500 to buy in shops.</li>
 					<br>
@@ -3440,7 +3440,7 @@ casinoMusic.loop = true;
 	p.maxArmor += 15;
     p.agility = p.agility - 15;
   },
-  "Ball & Chain": p => {
+  "Flail": p => {
     p.attack = Math.ceil(p.attack * 2.5);
 	p.defense = Math.ceil(p.defense * 1.2);
     p.agility = p.agility - 10;
@@ -3491,14 +3491,10 @@ casinoMusic.loop = true;
   },
   
   "Excalibur": p => {
-    // triple attack
     p.attack *= 3;
-    // double agility & perception
     p.agility  = Math.ceil(p.agility * 2);
     p.perception = Math.ceil(p.perception * 2);
-    // increase defense by 1.5×, rounded up
     p.defense = Math.ceil(p.defense * 1.5);
-    // +25 max mana
     p.maxMana += 25;
   },
   "Dragon's Fang": p => {
@@ -3695,11 +3691,11 @@ const weaponSkillMap = {
   "Shield": "Bash",
   "Greatsword": "Heavy Slash",
   "Warhammer": "Smash",
+  "Gauntlets": "Pummel",
   "Staff": "Blast Minima",
   "Excalibur": "Execution",
   "Sorceress' Staff": "Rewind",
   "Dragon's Fang": "Outrage",
-  "Gauntlets": "Pummel",
   
   "Doomblade Arm Upgrade": "Glory Slash",
   "Chainshield": "Launch",
@@ -5927,7 +5923,7 @@ let shopItemsList = [
 	description: "Extremely heavy, but very powerful, allowing you to smash foes to bits.",
   },
   {
-    name: "Ball & Chain",
+    name: "Flail",
     cost: 500,
     type: "equipment",
     category: "weapon",
@@ -6295,7 +6291,7 @@ shopItemsList = [
 	description: "An attachment to the Slayer's armor and weapons, allowing more versatility in battle.",
   },
   {
-    name: "Ball & Chain",
+    name: "Flail",
     cost: 500,
     type: "equipment",
     category: "weapon",
@@ -7033,11 +7029,11 @@ function generateAdjacentRooms(cx, cy) {
 	  }
 
 const mimicTemplate = {
-  name: "Mimic",
-  hp: 65500,
-  damageRange: [70, 90],
-  expReward: [500, 500],
-  moneyReward: [500, 500],
+ name: "Mimic",
+  hp: 200,
+  damageRange: [4, 8],
+  expReward: [2, 3],
+  moneyReward: [10, 15],
   reductionAll: 0,
   poison: false,
   frozen: 0,
@@ -7604,19 +7600,29 @@ function applyPlayerStatus(type, duration = null) {
 		return;
   } else if (map[key].type === ROOM_TYPES.LOOT) {
     if (Math.random() < 0.05) {
-    alert("You found some treasure!");
-	alert("But wait... a treasure chest turned out to be a Mimic!");
-    ambushEnemiesQueue = [ JSON.parse(JSON.stringify(mimicTemplate)) ];
-    ambushCompleteCallback = () => {
-      alert("You have defeated the Mimic!");
-      handleLootRoom();
-    };
-    // kick off the fight
-    startNextAmbush();
-    return;
-  } else {
-    handleLootRoom();
-  }
+		alert("You found some treasure!");
+		alert("But wait... a treasure chest turned out to be a Mimic!");
+		const mimic = JSON.parse(JSON.stringify(mimicTemplate));
+		const minLv = Math.max(player.level - 3, 1);
+		const maxLv = player.level + 5;
+		const enemyLevel = Math.floor(Math.random() * (maxLv - minLv + 1)) + minLv;
+		mimic.level = enemyLevel;
+		const levelDiff = enemyLevel - player.level;
+		const scale = 1 + 0.05 * levelDiff;
+		mimic.hp = mimic.maxHp = Math.max(1, Math.round(mimic.hp * scale));
+		mimic.damageRange = [
+			Math.max(1, Math.round(mimic.damageRange[0] * scale)),
+			Math.max(1, Math.round(mimic.damageRange[1] * scale))
+		];
+		ambushEnemiesQueue = [ mimic ];
+		ambushCompleteCallback = () => {
+			alert("You have defeated the Mimic!");
+			finalizeRoom(key);
+		};
+		startNextAmbush();
+	} else {
+		handleLootRoom();
+	}
   } else if (map[key].type === ROOM_TYPES.TRAP) {
     handleTrapRoom();
   }
@@ -7746,7 +7752,7 @@ function selectClass(cls) {
 
 function applyClassEffects(cls) {
 	const swordNames = ["Sword", "Greatsword", "Excalibur"];
-	const heavyNames = ["Greatsword", "Warhammer", "Spear", "Ball & Chain", "Battle Axe", "Mace"];
+	const heavyNames = ["Greatsword", "Warhammer", "Spear", "Flail", "Battle Axe", "Mace"];
 	const assassinNames = ["Dagger", "Hatchets"];
 	const hunterNames = ["Bow", "Hatchets"];
 	const gauntletNames  = ["Gauntlets"];
