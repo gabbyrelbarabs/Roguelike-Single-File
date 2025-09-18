@@ -3264,6 +3264,8 @@ document.addEventListener(
   "Freezing Tundra": { audio: new Audio("Tundra.mp3"), savedTime: 0 },
   "The Black Sea": { audio: new Audio("sea.mp3"), savedTime: 0 },
   "Vast Ocean": { audio: new Audio("ocean.mp3"), savedTime: 0 },
+  "Jeju Island": { audio: new Audio("island.mp3"), savedTime: 0 },
+  "Giant Ant Nest": { audio: new Audio("antnest.mp3"), savedTime: 0 },
   "Valrr Trench": { audio: new Audio("trench.mp3"), savedTime: 0 },
   "Sky Dimension": { audio: new Audio("sky.mp3"), savedTime: 0 },
   "Future Megalopolis": { audio: new Audio("tech.mp3"), savedTime: 0 },
@@ -3279,7 +3281,7 @@ document.addEventListener(
   "Even Further Beyond": { audio: new Audio("roadtotheend.mp3"), savedTime: 0 },
   "Realm Of The Gods": { audio: new Audio("bossmusic.mp3"), savedTime: 0 },
 };
-const titleMusicOptions = ["gojira.mp3"];
+const titleMusicOptions = ["fire.mp3", "tokyo.mp3", "hero.mp3", "special.mp3", "bang.mp3", "level.mp3", "titan.mp3", "rumbling.mp3"];
 const titleIndex = Math.floor(Math.random() * titleMusicOptions.length);
 const titleMusic = new Audio(titleMusicOptions[titleIndex]);
 titleMusic.loop = true;
@@ -6586,7 +6588,14 @@ function handleTitleScreenClick() {
 	console.log("Title music playback prevented:", e);
   });
   const src = titleMusic.src;  
-  if (src.includes("gojira.mp3")) titleBox.classList.add("jump-zoom-gojira");
+  if (src.includes("fire.mp3")) titleBox.classList.add("jump-zoom-fire");
+  if (src.includes("tokyo.mp3")) titleBox.classList.add("jump-zoom-tokyo");
+  if (src.includes("hero.mp3")) titleBox.classList.add("jump-zoom-hero");
+  if (src.includes("special.mp3")) titleBox.classList.add("jump-zoom-special");
+  if (src.includes("bang.mp3")) titleBox.classList.add("jump-zoom-bang");
+  if (src.includes("level.mp3")) titleBox.classList.add("jump-zoom-level");
+  if (src.includes("titan.mp3")) titleBox.classList.add("jump-zoom-titan");
+  if (src.includes("rumbling.mp3")) titleBox.classList.add("jump-zoom-rumbling");
   playButton.style.display = "block";
   titleScreen.removeEventListener("click", handleTitleScreenClick);
 }
@@ -8064,7 +8073,7 @@ if (gameDifficulty === "normal") {
 }
         let rewardMultiplier = Math.pow(1.5, floorBonus);
         currentEnemy.expReward = [currentEnemy.expReward[0] * rewardMultiplier, currentEnemy.expReward[1] * rewardMultiplier];
-        currentEnemy.moneyReward = [currentEnemy.moneyReward[0] * rewardMultiplier, currentEnemy.moneyReward[1] * rewardMultiplier];
+        currentEnemy.moneyReward = [currentEnemy.moneyReward[0], currentEnemy.moneyReward[1]];
         currentEnemy.poison = false;
 		currentEnemy.frozen = 0;
 		currentEnemy.burned = false;
@@ -8113,8 +8122,8 @@ if (gameDifficulty === "normal") {
       hp:          player.maxHp,
       maxHp:       player.maxHp,
       damageRange: [ player.attack, player.magic ],
-      expReward:   player.level,
-      moneyReward: player.level,
+      expReward:   [10, 10],
+      moneyReward: [10, 10],
       poison:      false,
 	  frozen:      0,
 	  burned:      false,
@@ -8271,7 +8280,7 @@ finalizeRoom(key);
 
     const rewardMultiplier = Math.pow(1.5, floorBonus);
     bossData.expReward = [bossData.expReward[0] * rewardMultiplier, bossData.expReward[1] * rewardMultiplier];
-    bossData.moneyReward = [bossData.moneyReward[0] * rewardMultiplier, bossData.moneyReward[1] * rewardMultiplier];
+    bossData.moneyReward = [bossData.moneyReward[0], bossData.moneyReward[1]];
 
     // Finalize currentEnemy
     currentEnemy.boss  = true;
@@ -8352,8 +8361,8 @@ finalizeRoom(key);
 		bossData.expReward[1] * rewardMultiplier
 	];
 	bossData.moneyReward = [
-		bossData.moneyReward[0] * rewardMultiplier,
-		bossData.moneyReward[1] * rewardMultiplier
+		bossData.moneyReward[0],
+		bossData.moneyReward[1]
 	];
   currentEnemy = JSON.parse(JSON.stringify(bossData));
   currentEnemy.boss = true;
@@ -8456,7 +8465,7 @@ if (gameDifficulty === "normal") {
 
 	const mult = Math.pow(1.5, floorBonus);
     e.expReward   = [e.expReward[0]   * mult, e.expReward[1]   * mult];
-    e.moneyReward = [e.moneyReward[0] * mult, e.moneyReward[1] * mult];
+    e.moneyReward = [e.moneyReward[0], e.moneyReward[1]];
     e.poison = false;
 	e.burned = false;
 	e.frozen = 0;
@@ -11996,5 +12005,4 @@ initGame();
     </script>
   <div id="tooltip"></div>
   </body>
-
 </html>
