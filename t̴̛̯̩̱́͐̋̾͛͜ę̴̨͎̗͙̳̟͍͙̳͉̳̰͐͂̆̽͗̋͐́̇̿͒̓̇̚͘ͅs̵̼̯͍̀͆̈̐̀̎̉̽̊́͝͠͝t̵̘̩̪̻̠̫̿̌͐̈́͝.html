@@ -287,7 +287,7 @@
       minDmg: 12000, maxDmg: 33000,
       healMin: 150, healMax: 300,
       maxEnergy: 100, energy: 100,
-      healCost: 50, attackCost: 0, magicCost: 30
+      healCost: 40, attackCost: 0, magicCost: 30
     };
     const boss = { maxHp: 1000, hp: 1000, minDmg: 7, maxDmg: 13 };
 	boss.maxHp = boss.hp;
@@ -924,14 +924,8 @@ if (restBtn) {
 	  
 	  if (idleTimeout) clearTimeout(idleTimeout);
 	  idleTimeout = setTimeout(() => {
-	    if (enraged) {
-		  log(bossDisplayName + ` attacked and dealt ${rageDamage} damage!`);
-		} else {
-		  log(bossDisplayName + ` attacked and dealt ${bossdmg} damage!`);
-		}
-		log(bossImpatient);
 		bossAction();
-	  }, rand(1000, 3000));
+	  }, rand(800, 2500));
 	  if (enraged) setupEnrageIntervals();
 	 }
 
@@ -952,9 +946,6 @@ if (restBtn) {
 		totalDamageDealt += dmg;
       }
       updateUI();
-      setTimeout(() => {
-          bossAction();
-      }, 100);
     });
 
     magBtn.addEventListener('click', () => {
@@ -980,9 +971,6 @@ if (restBtn) {
 		totalDamageDealt += dmg;
       }
       updateUI();
-      setTimeout(() => {
-          bossAction();
-      }, 100);
     });
 
     restBtn.addEventListener('click', () => {
@@ -997,7 +985,6 @@ if (restBtn) {
       player.energy = Math.min(player.maxEnergy, player.energy+eng);
       log('You rested and recover ' + eng + ' energy.');
       updateUI();
-      setTimeout(bossAction, 100);
     });
 
 healBtn.addEventListener('click', () => {
@@ -1035,8 +1022,6 @@ healBtn.addEventListener('click', () => {
 
   // record last heal timestamp (start 30s cooldown)
   window.__lastHealTime = Date.now();
-
-  setTimeout(bossAction, 100);
 });
 
 	function bossAction() {
