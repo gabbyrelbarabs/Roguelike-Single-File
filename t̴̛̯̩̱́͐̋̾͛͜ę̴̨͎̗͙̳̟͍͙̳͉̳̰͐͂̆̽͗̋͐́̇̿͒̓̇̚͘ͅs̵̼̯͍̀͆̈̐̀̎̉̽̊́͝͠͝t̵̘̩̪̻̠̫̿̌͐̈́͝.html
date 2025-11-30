@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>??????????????</title>
+  <link rel="shortcut icon" type="x-icon" href="nameless.ico" />
+  <style>
+    /* --- Fullscreen overlays --- */
+    .splash {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: #000;
+      color: #eee;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      font-family: sans-serif;
+      font-size: 1.5rem;
+      z-index: 1000;
+      opacity: 1;
+      transition: opacity 1s ease;
+    }
+    .splash.fade-out {
+      opacity: 0;
+	  transition: opacity 1s ease;
+    }
+	.fade-out {
+	  opacity: 0;
+	  transition: opacity 1s ease;
+	}
+
+    /* --- Game UI --- */
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #222;
+      color: #eee;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem;
+    }
+    .bar-container {
+      margin: 1rem 0;
+      width: 300px;
+      background: #444;
+      border-radius: 5px;
+      position: relative;
+    }
+	.bar-fill {
+      height: 25px;
+      width: 100%;
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+    #player-bar .bar-fill {
+	  background: green;
+	}
+    #energy-bar .bar-fill {
+	  background: blue;
+	}
+    #boss-bar .bar-fill   {
+	  background: red;
+	}
+    .bar-label {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      top: 0;
+      line-height: 25px;
+      font-weight: bold;
+    }
+    #log {
+      width: 300px;
+      height: 150px;
+      background: #111;
+      border: 1px solid #333;
+      padding: 0.5rem;
+      overflow-y: auto;
+      font-size: 0.9rem;
+    }
+    button {
+      margin: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+	#deathMenu {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.85);
+    color: #fff;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 2rem;
+	opacity: 0;
+    transition: opacity 10ms ease-in;
+    box-sizing: border-box;
+    text-align: center;
+	}
+	#deathMenu.active {
+	 opacity: 1;
+	}
+	#deathMenu h2 { margin-bottom: .5rem; }
+	#deathMenu .stats { margin: 1rem 0; }
+	#deathMenu button {
+      margin: .5rem;
+      padding: .75rem 1.5rem;
+      font-size: 1rem;
+	  cursor: pointer;
+	}
+	/* simple fade‑to‑black */
+	#screenFade {
+      position: fixed;
+      top:0; left:0;
+      width:100%; height:100%;
+      background:#000;
+      opacity:0;
+      pointer-events:none;
+      transition: opacity 1s ease-in;
+      z-index:9998;
+	}
+.intro-white {
+  /* make bars, text, buttons, and log pure white */
+  color: #ffffff !important;
+  background-color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Apply white fill for bar-fill when intro active */
+.intro-white .bar-fill {
+  background: #ffffff !important;
+}
+
+/* Buttons white during intro */
+.intro-white button {
+  background: #ffffff !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Log background/text white */
+.intro-white #log {
+  background: #ffffff !important;
+  color: #ffffff !important;
+  border-color: #ffffff !important;
+}
+
+/* Boss bar container expansion to 5x width over 38s */
+#boss-bar.boss-expand {
+  transition: width 38s linear;
+  width: 1000px !important;
+}
+
+/* Make the boss bar fill use a smooth, very fast rainbow animation */
+@keyframes fastRainbow {
+  0%   { background: #ff0000; }
+  16%  { background: #ff7f00; }
+  33%  { background: #ffff00; }
+  50%  { background: #00ff00; }
+  66%  { background: #0000ff; }
+  83%  { background: #4b0082; }
+  100% { background: #ff0000; }
+}
+
+/* any attack marker with boss-rainbow will cycle colors very quickly */
+.attack-marker.boss-rainbow {
+  animation: fastRainbow 0.22s linear infinite;
+  transition: background-color 0.08s linear;
+}
+
+/* keep the beam element also rainbow if applied */
+.attack-marker.boss-rainbow[style] {
+  animation: fastRainbow 0.22s linear infinite;
+}
+
+.boss-rainbow {
+  animation: fastRainbow 0.35s linear infinite;
+  /* keep transition smooth if animation toggled */
+  transition: background-color 0.1s linear;
+}
+
+/* Player hp gradient and energy gradient styles (applied after intro) */
+.player-gradient {
+  background: linear-gradient(90deg, green, yellow, blue, red) !important;
+  transition: background 0.3s ease;
+}
+.energy-gradient {
+  background: linear-gradient(90deg, white, blue, magenta) !important;
+  transition: background 0.3s ease;
+}
+
+.distorted-moving {
+  display: inline-block;             /* so transforms apply to the whole H1 text */
+  transition: transform 0.08s linear; /* smooth small movement */
+  will-change: transform;
+}
+
+/* intro video style (if not already present) */
+.intro-video {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;           /* behind the UI */
+  pointer-events: none;  /* keep UI clickable if needed */
+  background: black;
+}
+	#screenFade.active { opacity:1; pointer-events:auto; }
+  </style>
+</head>
+<body>
+<div id="screenFade"></div>
+<div id="deathMenu">
+  <h2>You Died</h2>
+  <div class="stats">
+    <div>Battle Duration: <span id="dm-duration"></span></div>
+    <div>Damage Dealt: <span id="dm-damage-dealt"></span></div>
+    <div>Boss Remaining HP: <span id="dm-boss-percent"></span></div>
+  </div>
+  <hr style="width:80%; border-color: #555; margin:1rem 0;">
+  <p id="dm-message"></p>
+  <div>
+    <button id="dm-retry">Retry</button>
+    <button id="dm-quit">Quit</button>
+  </div>
+</div>
+
+  <!-- Version splash (unclickable) -->
+  <div id="versionSplash" class="splash">
+    <span id="versionName">Roguelike! Deluxe Edition V</span>
+	<span id="versionText">5.0.0</span>
+  </div>
+
+  <h1>??????????????</h1>
+
+  <!-- Bars -->
+  <div id="player-bar" class="bar-container">
+    <div class="bar-fill"></div>
+    <div class="bar-label">HP: 100 / 100</div>
+  </div>
+  <div id="energy-bar" class="bar-container">
+    <div class="bar-fill"></div>
+    <div class="bar-label">Mana: 100 / 100</div>
+  </div>
+  <div id="boss-bar" class="bar-container">
+    <div class="bar-fill"></div>
+    <div class="bar-label">??????????????: 1000 / 1000</div>
+  </div>
+
+  <!-- Controls -->
+  <div>
+    <button id="attack-btn">Attack</button>
+    <button id="magic-btn">Magic</button>
+    <button id="rest-btn">Rest</button>
+    <button id="heal-btn">Heal</button>
+  </div>
+  <div id="log"></div>
+
+<script>
+  const deathMenu   = document.getElementById("deathMenu");
+  const screenFade  = document.getElementById("screenFade");
+  const dmDuration      = document.getElementById("dm-duration");
+  const dmDamageDealt   = document.getElementById("dm-damage-dealt");
+  let totalDamageDealt = 0;
+  const dmBossPercent   = document.getElementById("dm-boss-percent");
+  const dmMessage       = document.getElementById("dm-message");
+  const btnRetry        = document.getElementById("dm-retry");
+  const btnQuit         = document.getElementById("dm-quit");
+  const versionSplash = document.getElementById('versionSplash');
+  const versionText   = document.getElementById('versionText');
+  const clickable     = document.getElementById('clickable');
+  
+  const player = {
+      maxHp: 100, hp: 100,
+      minDmg: 12000, maxDmg: 33000,
+      healMin: 150, healMax: 300,
+      maxEnergy: 100, energy: 100,
+      healCost: 50, attackCost: 0, magicCost: 30
+    };
+    const boss = { maxHp: 1000, hp: 1000, minDmg: 7, maxDmg: 13 };
+	boss.maxHp = boss.hp;
+    let turn = 1;
+	let enrageTriggered = false;
+	let enraged         = false;
+	let rageDamage      = 0;
+	let idleTimeout = null;
+	
+	window.__hpRegenInterval = null;
+	window.__mpRegenInterval = null;
+	
+	let randomLineAttackInterval = null;
+	let randomLineAttackRunning = false;
+	let specialAttackActive = false;
+
+    const pFill   = document.querySelector('#player-bar .bar-fill');
+    const pLabel  = document.querySelector('#player-bar .bar-label');
+    const eFill   = document.querySelector('#energy-bar .bar-fill');
+    const eLabel  = document.querySelector('#energy-bar .bar-label');
+    const bFill   = document.querySelector('#boss-bar .bar-fill');
+    const bLabel  = document.querySelector('#boss-bar .bar-label');
+    const atkBtn  = document.getElementById('attack-btn');
+    const magBtn  = document.getElementById('magic-btn');
+    const restBtn = document.getElementById('rest-btn');
+    const healBtn = document.getElementById('heal-btn');
+    const logEl   = document.getElementById('log');
+	const usageStreaks = { magic: 0, rest: 0, heal: 0 };
+	const cooldowns    = { magic: 0, rest: 0, heal: 0 };
+
+    function rand(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+  
+  let battleStartTime = null;
+  
+window.__lastHealTime = window.__lastHealTime || 0;
+
+// Helper: returns remaining seconds of heal cooldown (integer)
+function healCooldownRemainingSec() {
+  const last = window.__lastHealTime || 0;
+  const diff = Date.now() - last;
+  const rem = Math.max(0, 30000 - diff);
+  return Math.ceil(rem / 1000); // seconds (rounded up)
+}
+  
+window.__distortedTitleInterval = null;
+const titleH1 = document.querySelector('h1');
+const video = document.createElement('video');
+
+function startDistortedTitle(el, minLen = 8, maxLen = 14, tickMs = 80) {
+  if (!el) return;
+  // ensure the element can be transformed smoothly
+  el.classList.add('distorted-moving');
+
+  // charset uses the 16 letters + lowercase + digits + symbols (same as intro)
+  const baseLetters = 'ABCDEFGHIJKLMNOP';
+  const symbols = '!@#$%^&*()-_=+[]{};:,.<>?/\\|~`';
+  const digits = '0123456789';
+  const charset = (baseLetters + baseLetters.toLowerCase() + digits + symbols).split('');
+
+  // clear existing
+  if (window.__distortedTitleInterval) {
+    clearInterval(window.__distortedTitleInterval);
+    window.__distortedTitleInterval = null;
+  }
+
+  // pick length once, but jitter length slightly over time
+  let currentLen = Math.floor(Math.random() * (maxLen - minLen + 1)) + minLen;
+
+  window.__distortedTitleInterval = setInterval(() => {
+    // occasionally nudge length by +/-1
+    if (Math.random() < 0.12) {
+      currentLen += (Math.random() < 0.5 ? -1 : 1);
+      if (currentLen < minLen) currentLen = minLen;
+      if (currentLen > maxLen) currentLen = maxLen;
+    }
+    // build random string
+    let s = '';
+    for (let i = 0; i < currentLen; i++) {
+      s += charset[Math.floor(Math.random() * charset.length)];
+    }
+    el.textContent = s;
+
+    // tiny movement jitter: translate ±(0-6) px x and y and slight rotation
+    const tx = (Math.random() - 0.5) * 6; // -3 .. +3
+    const ty = (Math.random() - 0.5) * 6; // -3 .. +3
+    const rot = (Math.random() - 0.5) * 8; // -4deg .. +4deg
+    const scale = 1 + (Math.random() - 0.5) * 0.02; // tiny scale
+    el.style.transform = `translate(${tx}px, ${ty}px) rotate(${rot}deg) scale(${scale})`;
+  }, tickMs);
+}
+
+function stopDistortedTitle(el, restoreText) {
+  if (!el) return;
+  if (window.__distortedTitleInterval) {
+    clearInterval(window.__distortedTitleInterval);
+    window.__distortedTitleInterval = null;
+  }
+  el.classList.remove('distorted-moving');
+  el.style.transform = '';
+  if (typeof restoreText !== 'undefined') el.textContent = restoreText;
+}
+
+let bossDisplayName = "??????????????";
+let __bossDistortInterval = null;
+
+// small local random-string helper (safe, independent)
+function randomStringGlobal(len) {
+  const baseLetters = 'ABCDEFGHIJKLMNOP';
+  const symbols = '!@#$%^&*()-_=+[]{};:,.<>?/\\|~`';
+  const digits = '0123456789';
+  const charset = (baseLetters + baseLetters.toLowerCase() + digits + symbols);
+  let s = '';
+  for (let i = 0; i < len; i++) s += charset.charAt(Math.floor(Math.random() * charset.length));
+  return s;
+}
+
+// call to begin the moving/chaotic boss name
+// updates any elements with class "boss-name" automatically and keeps bossDisplayName updated
+function startDistortedBossName(minLen = 6, maxLen = 12, tickMs = 80) {
+  // clear any existing
+  if (__bossDistortInterval) clearInterval(__bossDistortInterval);
+  // set initial
+  bossDisplayName = randomStringGlobal(Math.floor((minLen + maxLen) / 2));
+  // ensure any visible elements immediately updated
+  document.querySelectorAll('.boss-name').forEach(el => el.textContent = bossDisplayName);
+
+  __bossDistortInterval = setInterval(() => {
+    const len = Math.floor(Math.random() * (maxLen - minLen + 1)) + minLen;
+    bossDisplayName = randomStringGlobal(len);
+    // update inline boss-name spans wherever they exist
+    document.querySelectorAll('.boss-name').forEach(el => el.textContent = bossDisplayName);
+  }, tickMs);
+}
+
+function stopDistortedBossName(restore = "Previous Hero") {
+  if (__bossDistortInterval) {
+    clearInterval(__bossDistortInterval);
+    __bossDistortInterval = null;
+  }
+  bossDisplayName = restore;
+  // update UI text nodes
+  document.querySelectorAll('.boss-name').forEach(el => el.textContent = bossDisplayName);
+}
+
+// -----------------------------
+// Version splash: incrementing, exponential speed, simplified titles
+// Starts at 5.0.0, distorted title from v10.0.0+, click-to-continue at 21.6.7
+// -----------------------------
+// ---------- Robust 10ms stat-ramp tied to this click's `video` ----------
+// Put this right after you append and play the `video` element (uses local `video` var)
+
+const CUTSCENE_DURATION = 38; // seconds
+
+// capture starting values at the moment the cutscene begins
+const startStats_local = {
+  playerMaxStart: player.maxHp,
+  playerHpStart: player.hp,
+  playerEnergyMaxStart: player.maxEnergy,
+  playerEnergyStart: player.energy,
+  bossMaxStart: boss.maxHp,
+  bossHpStart: boss.hp
+};
+
+// final targets
+const targets_local = {
+  playerMaxTarget: 1080,
+  playerHpTarget: 1080,
+  playerEnergyMaxTarget: 550,
+  playerEnergyTarget: 550,
+  bossMaxTarget: 12000000,
+  bossHpTarget: 12000000
+};
+
+const startStats = startStats_local;
+const targets    = targets_local;
+
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function lerp(a,b,t){ return a + (b - a) * t; }
+
+function updateStatsRamp_local(videoTimeSec){
+  const t = clamp(videoTimeSec / CUTSCENE_DURATION, 0, 1);
+
+  player.maxHp = Math.floor(lerp(startStats_local.playerMaxStart, targets_local.playerMaxTarget, t));
+  player.hp = Math.min(player.maxHp, Math.floor(lerp(startStats_local.playerHpStart, targets_local.playerHpTarget, t)));
+
+  player.maxEnergy = Math.floor(lerp(startStats_local.playerEnergyMaxStart, targets_local.playerEnergyMaxTarget, t));
+  player.energy = Math.min(player.maxEnergy, Math.floor(lerp(startStats_local.playerEnergyStart, targets_local.playerEnergyTarget, t)));
+
+  boss.maxHp = Math.floor(lerp(startStats_local.bossMaxStart, targets_local.bossMaxTarget, t));
+  boss.hp = Math.min(boss.maxHp, Math.floor(lerp(startStats_local.bossHpStart, targets_local.bossHpTarget, t)));
+
+  // update the UI each tick
+  updateUI();
+}
+
+// ensure any previous ramp tickers are cleared (avoid duplicates)
+if (window.__cutsceneRampTicker) {
+  clearInterval(window.__cutsceneRampTicker);
+  window.__cutsceneRampTicker = null;
+}
+
+let __rampFinished_local = false;
+// give the video a brief moment to start if autoplay is blocked; the ticker will wait on valid currentTime
+window.__cutsceneRampTicker = setInterval(() => {
+  // safety guard: video might not be ready yet
+  if (!video || typeof video.currentTime !== 'number' || isNaN(video.currentTime)) {
+    return;
+  }
+
+  const t = video.currentTime;
+  // update stats each 10 ms based on video time
+  updateStatsRamp_local(t);
+
+  // debug: make sure ticker is running (remove when satisfied)
+  // console.debug('ramp tick', t.toFixed(3));
+
+  if (t >= CUTSCENE_DURATION && !__rampFinished_local) {
+    __rampFinished_local = true;
+    clearInterval(window.__cutsceneRampTicker);
+    window.__cutsceneRampTicker = null;
+
+    // FORCE the exact end values (avoid rounding quirks)
+    player.maxHp = targets_local.playerMaxTarget;
+    player.hp = targets_local.playerHpTarget;
+    player.maxEnergy = targets_local.playerEnergyMaxTarget;
+    player.energy = targets_local.playerEnergyTarget;
+    boss.maxHp = targets_local.bossMaxTarget;
+    boss.hp = targets_local.bossHpTarget;
+    updateUI();
+
+    // --- proceed with end-of-cutscene behaviour (flash, restore UI, start fight) ---
+    const flashEl = document.getElementById('screenFade');
+    if (flashEl) {
+      flashEl.style.background = '#ffffff';
+      flashEl.style.transition = 'none';
+      flashEl.classList.add('active');
+      setTimeout(() => {
+        flashEl.style.transition = 'opacity 0.1s linear';
+        flashEl.style.opacity = '1';
+        setTimeout(() => {
+          flashEl.style.transition = 'opacity 0.3s linear';
+          flashEl.style.opacity = '0';
+          setTimeout(() => {
+            flashEl.classList.remove('active');
+            flashEl.style.background = '#000';
+          }, 300);
+        }, 100);
+      }, 10);
+    }
+
+    // restore visuals and enable inputs
+    document.body.classList.remove('intro-white');
+    [atkBtn, magBtn, restBtn, healBtn].forEach(b => b.disabled = false);
+
+    // boss rainbow + gradients (visuals)
+    const bossFillEl = document.querySelector('#boss-bar .bar-fill');
+    if (bossFillEl) bossFillEl.classList.add('boss-rainbow');
+    const pFillEl = document.querySelector('#player-bar .bar-fill');
+    if (pFillEl) pFillEl.classList.add('player-gradient');
+    const eFillEl = document.querySelector('#energy-bar .bar-fill');
+    if (eFillEl) eFillEl.classList.add('energy-gradient');
+
+    // start distortions, regen, battle
+    const titleH1 = document.querySelector('h1');
+    if (titleH1) startDistortedTitle(titleH1, 8, 14, 80);
+    startDistortedBossName(6, 12, 80);
+
+    battleStartTime = Date.now();
+    if (typeof log === 'function') log(Math.random() < 0.5 ? `The battle with the ${bossDisplayName} begins!` : `${bossDisplayName} challenges you!`);
+
+    // start regen only now (be sure there's no other startRegen call elsewhere before this)
+    startRegen();
+
+    if (typeof startTurn === 'function') startTurn();
+    if (typeof setupSpecialIntervals === 'function') setupSpecialIntervals();
+  }
+}, 10);
+
+(function runVersionSplash() {
+  const versionSplashEl = document.getElementById("versionSplash");
+  const versionNameEl   = document.getElementById("versionName");
+  const versionTextEl   = document.getElementById("versionText");
+  if (!versionSplashEl || !versionNameEl || !versionTextEl) return;
+
+  // start at 5.0.0
+  const CLICK_VER = [16, 6, 7];
+  let ver = [5, 0, 0]; // [M, m, p]
+  let patchStepCount = 0;    // controls patch exponential speed
+  let MIN_DELAY_MS = 1;
+
+  // charset: 16 letters A-P (and lowercase), digits, symbols
+  const baseLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'; // 16 letters
+  const symbols = '!@#$%^&*()-_=+[]{};:,.<>?/\\|~`';
+  const digits = '0123456789';
+  const fullCharset = (baseLetters + baseLetters.toLowerCase() + digits + symbols).split('');
+
+  function rand(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function fmtVer([M, m, p]) { return `${M}.${m}.${p}`; }
+  function arraysEqual(a,b){ return a.length===b.length && a.every((v,i)=>v===b[i]); }
+  function randomString(len, charset){
+    let s = '';
+    for (let i=0;i<len;i++) s += charset[Math.floor(Math.random()*charset.length)];
+    return s;
+  }
+
+  // exponential params (tweak these for different acceleration feel)
+  const baseDelay = 800;    // starting patch delay in ms
+  const decayFactor = 0.67;  // <1 means exponential shrink per patch step
+
+  // increment helpers (patch drives minor/major via wrap)
+  function incrementPatch(){
+    ver[2]++; // p
+    if (ver[2] > 9) {
+      ver[2] = 0;
+      incrementMinor();
+    }
+  }
+  function incrementMinor(){
+    ver[1]++; // m
+    // minor "wrap" into major
+    if (ver[1] > 9) {
+      ver[1] = 0;
+      incrementMajor();
+    }
+  }
+  function incrementMajor(){
+    ver[0]++; // M
+  }
+
+  // main patch ticker - schedules itself with exponential delay
+  function scheduleNextPatchTick(){
+    // compute delay; step count increases each tick to shrink delay exponentially
+    const raw = baseDelay * Math.pow(decayFactor, patchStepCount);
+    const delay = Math.max(MIN_DELAY_MS, Math.floor(raw));
+
+    // show numeric version immediately
+    versionTextEl.textContent = fmtVer(ver);
+
+    // if we've hit click-to-continue version exactly, show clickable screen
+    if (arraysEqual(ver, CLICK_VER)) {
+      versionSplashEl.innerHTML =
+        `<div style="text-align:center; width:100%;">
+           <div style="font-size:1.25rem; margin-bottom:1rem;">𝚈𝚘𝚞𝚛 𝚏𝚒𝚗𝚊𝚕 𝚝𝚎𝚜𝚝 𝚋𝚎𝚐𝚒𝚗𝚜.</div>
+           <div style="font-size:0.9rem; opacity:0.8;"><em>Click anywhere to start</em></div>
+         </div>`;
+versionSplashEl.addEventListener('click', function onceStart() {
+  versionSplashEl.removeEventListener('click', onceStart);
+
+  // Immediately begin fade-out on the splash
+  versionSplashEl.classList.add('fade-out');
+
+  // Immediately set the H1 title to question marks for the 38s duration
+  if (titleH1 && video.currentTime < 38) titleH1.textContent = '??????????????';
+
+  // Immediately create and append the intro video so it starts playing alongside the fade
+  const videoSrc = `nameless.mp4`;
+  video.id = 'introVideo';
+  video.className = 'intro-video';
+  video.src = videoSrc;
+  video.autoplay = true;
+  video.playsInline = true;
+  video.muted = false;
+  video.loop = false;
+  video.preload = 'auto';
+  document.body.appendChild(video);
+  video.play().catch(()=>{ /* ignore autoplay blocks */ });
+
+  // Remove the splash after the fade is visually finished (keep video running)
+  const FADE_MS = 1000;
+  setTimeout(() => {
+    try { versionSplashEl.remove(); } catch(e) {}
+  }, FADE_MS);
+
+  // APPLY INTRO VISUAL STATE IMMEDIATELY
+  [atkBtn, magBtn, restBtn, healBtn].forEach(b => b.disabled = true);
+  document.body.classList.add('intro-white');
+  document.getElementById('boss-bar')?.classList.add('boss-expand');
+  document.querySelector('#boss-bar .bar-fill')?.style.setProperty('background', '#ffffff');
+
+  // Wait for 38 seconds of video time, then trigger end-of-cutscene behavior
+  let started = false;
+
+  let _rampStarted = false;
+function onTimeUpdateRamp() {
+// Update ramp every tick based on video time
+  updateStatsRamp_local(video.currentTime);
+
+  // When we reach the cutscene end, finalize and proceed
+  if (video.currentTime >= CUTSCENE_DURATION && !_rampStarted) {
+    _rampStarted = true;
+    video.removeEventListener('timeupdate', onTimeUpdateRamp);
+
+    // Force exact final values to avoid rounding issues
+    player.maxHp = targets.playerMaxTarget;
+    player.hp = targets.playerHpTarget;
+    player.maxEnergy = targets.playerEnergyMaxTarget;
+    player.energy = targets.playerEnergyTarget;
+    boss.maxHp = targets.bossMaxTarget;
+    boss.hp = targets.bossHpTarget;
+    updateUI();
+
+    // Existing flash + enable UI + start regen / start battle etc.
+    const flashEl = document.getElementById('screenFade');
+    if (flashEl) {
+      flashEl.style.background = '#ffffff';
+      flashEl.style.transition = 'none';
+      flashEl.classList.add('active');
+      setTimeout(() => {
+        flashEl.style.transition = 'opacity 0.1s linear';
+        flashEl.style.opacity = '1';
+        setTimeout(() => {
+          flashEl.style.transition = 'opacity 0.3s linear';
+          flashEl.style.opacity = '0';
+          setTimeout(() => {
+            flashEl.classList.remove('active');
+            flashEl.style.background = '#000';
+          }, 300);
+        }, 100);
+      }, 10);
+    }
+
+    // Restore UI colors, re-enable buttons
+    document.body.classList.remove('intro-white');
+    [atkBtn, magBtn, restBtn, healBtn].forEach(b => b.disabled = false);
+
+    // Make boss fill rainbow, player fills gradient, energy gradient
+    const bossFillEl = document.querySelector('#boss-bar .bar-fill');
+    if (bossFillEl) {
+      bossFillEl.classList.add('boss-rainbow');
+      bossFillEl.style.background = '';
+    }
+    const pFillEl = document.querySelector('#player-bar .bar-fill');
+    if (pFillEl) {
+      pFillEl.classList.add('player-gradient');
+      pFillEl.style.background = '';
+    }
+    const eFillEl = document.querySelector('#energy-bar .bar-fill');
+    if (eFillEl) {
+      eFillEl.classList.add('energy-gradient');
+      eFillEl.style.background = '';
+    }
+
+    // start distorted title + boss name + regen + battle start + specials
+    const titleH1 = document.querySelector('h1');
+    if (titleH1) startDistortedTitle(titleH1, 8, 14, 80);
+// immediate jumpscare at battle start
+showJumpscare();
+// start the repeating 1%/s chance (will respect 30s cooldown from the immediate show)
+startJumpscareTicker();
+    startDistortedBossName(12,15,80);
+
+    // set battle start time and begin systems
+    battleStartTime = Date.now();
+    if (typeof log === 'function') log(Math.random() < 0.5 ? "The battle with the Previous Hero begins!" : "The Previous Hero challenges you!");
+    startRegen();
+    if (typeof startTurn === 'function') startTurn();
+    if (typeof setupSpecialIntervals === 'function') setupSpecialIntervals();
+  }
+}
+
+video.addEventListener('timeupdate', onTimeUpdateRamp);
+
+// Also perform an immediate ramp update in case metadata loaded and currentTime > 0
+updateStatsRamp_local(video.currentTime || 0);
+
+  // safety fallback for short videos
+  video.addEventListener('loadedmetadata', function onceMeta() {
+    if (video.duration && video.duration <= 38 && !video.paused) {
+      if (video.currentTime < 38) video.currentTime = Math.min(38, video.duration);
+    }
+    video.removeEventListener('loadedmetadata', onceMeta);
+  });
+});
+      return;
+    }
+
+    // Title behavior before scheduling the next tick:
+    // M < 6 ⇒ fixed official title
+    // 6 ≤ M < 10 ⇒ '???'
+    // M ≥ 10 ⇒ distorted title randomized while waiting 'delay' ms
+    const M = ver[0];
+    if (M >= 10) {
+      // Distorted mode
+      const charUpdate = Math.max(8, Math.floor(delay / 6)); // how often characters change
+      const startT = Date.now();
+
+      // ensure numeric shown while distorting
+      versionTextEl.textContent = fmtVer(ver);
+
+      // run an interval that randomizes until 'delay' elapsed
+      const distortTimer = setInterval(() => {
+        versionNameEl.textContent = randomString(15, fullCharset) +" V";
+        versionTextEl.textContent = fmtVer(ver);
+        if (Date.now() - startT >= delay) {
+          clearInterval(distortTimer);
+        }
+      }, charUpdate);
+      // After 'delay' ms, perform the numeric increment(s)
+      setTimeout(() => {
+        incrementPatch();
+        patchStepCount++;
+        // schedule next tick immediately
+        scheduleNextPatchTick();
+      }, delay);
+
+      return;
+    }
+
+    if (M >= 6) {
+      versionNameEl.textContent = '??? V';
+      // schedule patch increment after delay
+      setTimeout(() => {
+        incrementPatch();
+        patchStepCount++;
+        scheduleNextPatchTick();
+      }, delay);
+      return;
+    }
+
+    // default (M < 6)
+    versionNameEl.textContent = 'Roguelike! Single File V';
+    setTimeout(() => {
+      incrementPatch();
+      patchStepCount++;
+      scheduleNextPatchTick();
+    }, delay);
+  }
+
+  // start ticking
+  scheduleNextPatchTick();
+})();
+
+function replaceBossNamesInString(s) {
+  if (typeof s !== 'string') return s;
+  // replace both "The Previous Hero" and "Previous Hero"
+  return s.replace(/The Previous Hero/g, bossDisplayName).replace(/Previous Hero/g, bossDisplayName);
+}
+
+// new updateUI that uses a .boss-name span so we can update it dynamically
+function updateUI() {
+  pFill.style.width = `${Math.max(0, player.hp / player.maxHp * 100)}%`;
+  pLabel.textContent = `HP: ${Math.max(0, player.hp)} / ${player.maxHp}`;
+  eFill.style.width = `${player.energy / player.maxEnergy * 100}%`;
+  eLabel.textContent = `Mana: ${player.energy} / ${player.maxEnergy}`;
+
+  // ensure the boss label uses a span with class boss-name; update only the variable part
+  // keep the rest of the label layout identical to previous style
+  const bossNameSpan = `<span class="boss-name">${bossDisplayName}</span>`;
+  bFill.style.width = `${Math.max(0, boss.hp / boss.maxHp * 100)}%`;
+  bLabel.innerHTML = `${bossNameSpan}: ${Math.max(0, boss.hp)} / ${boss.maxHp}`;
+}
+
+// new log that replaces boss phrases in any future messages
+function log(msg) {
+  // replace boss strings
+  const fixed = replaceBossNamesInString(String(msg));
+  const p = document.createElement('p');
+  p.textContent = fixed;
+  logEl.appendChild(p);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+
+
+function checkEnd() {
+  if (player.hp <= 0) {
+    alert("𝚈𝚘𝚞 𝚑𝚊𝚟𝚎 𝚏𝚊𝚒𝚕𝚎𝚍 𝚝𝚑𝚎 𝚝𝚎𝚜𝚝.");
+    window.close();
+    return true;
+  }
+
+  if (boss.hp <= 0) {
+    alert("𝚈𝚘𝚞 𝚑𝚊𝚟𝚎 𝚙𝚊𝚜𝚜𝚎𝚍 𝚝𝚑𝚎 𝚝𝚎𝚜𝚝.");
+    window.location.href = "index.html";
+    return true;
+  }
+  return false;
+}
+
+    function startTurn() {
+	  log("");
+      updateUI();
+	  if (!enrageTriggered && boss.hp <= boss.maxHp / 2) {
+		enrageTriggered = true;
+		return triggerEnrageSequence();
+      }
+	  if (checkEnd()) return;
+	  for (let action of ['magic','rest','heal']) {
+		if (cooldowns[action] > 0) cooldowns[action]--;
+	  }
+	  if (cooldowns.magic === 0) magBtn.textContent  = 'Magic';
+	  if (cooldowns.rest  === 0) restBtn.textContent = 'Rest';
+	  if (cooldowns.heal  === 0) healBtn.textContent = 'Heal';
+      atkBtn.disabled  = player.energy < player.attackCost;
+      magBtn.disabled  = player.energy < player.magicCost;
+      healBtn.disabled = player.energy < player.healCost;
+	  magBtn.disabled  = player.energy < player.magicCost || cooldowns.magic > 0;
+if (restBtn) {
+    // If enraged: hide Rest (safer than removal)
+    if (enraged) {
+      restBtn.style.display = 'none';
+      restBtn.disabled = true;
+    } else {
+      restBtn.style.display = '';
+      restBtn.disabled = cooldowns.rest > 0 || player.energy >= player.maxEnergy;
+      restBtn.textContent = (cooldowns.rest > 0 || player.energy >= player.maxEnergy) ? 'Not Tired' : 'Rest';
+    }
+  }
+
+  // HEAL button behavior
+  if (healBtn) {
+    // If enraged: hide Heal
+    if (enraged) {
+      healBtn.style.display = 'none';
+      healBtn.disabled = true;
+    } else {
+      // check time-based 30s cooldown first
+      const rem = healCooldownRemainingSec();
+      if (rem > 0) {
+        healBtn.disabled = true;
+        healBtn.textContent = `Heal (${rem}s)`;
+      } else if (cooldowns.heal > 0) {
+        healBtn.disabled = true;
+        healBtn.textContent = 'Recharging...';
+      } else {
+        healBtn.disabled = player.energy < player.healCost;
+        healBtn.textContent = 'Heal';
+      }
+    }
+  }
+	  
+	  if (idleTimeout) clearTimeout(idleTimeout);
+	  idleTimeout = setTimeout(() => {
+	    if (enraged) {
+		  log(bossDisplayName + ` attacked and dealt ${rageDamage} damage!`);
+		} else {
+		  log(bossDisplayName + ` attacked and dealt ${bossdmg} damage!`);
+		}
+		log(bossImpatient);
+		bossAction();
+	  }, rand(1000, 3000));
+	  if (enraged) setupEnrageIntervals();
+	 }
+
+    atkBtn.addEventListener('click', () => {
+	  if (idleTimeout) clearTimeout(idleTimeout);
+      [atkBtn, magBtn, restBtn, healBtn].forEach(b=>b.disabled=true);
+      player.energy -= player.attackCost;
+      if (Math.random() < 0.05) {
+        const dodgeMsg = rand(1, 2) === 1
+		? bossDisplayName + " dodged your attack!"
+		: bossDisplayName + " blocked your attack!";
+		log(dodgeMsg);
+      } else {
+        let dmg = rand(player.minDmg, player.maxDmg);
+        if (Math.random() < 0.4) { dmg*=3; log('Critical Hit! You attacked and dealt ' + dmg + ' damage.'); }
+        else                  { log('You attack for ' + dmg + ' damage.'); }
+        boss.hp -= dmg;
+		totalDamageDealt += dmg;
+      }
+      updateUI();
+      setTimeout(() => {
+          bossAction();
+      }, 100);
+    });
+
+    magBtn.addEventListener('click', () => {
+	  usageStreaks.magic++;
+	  if (idleTimeout) clearTimeout(idleTimeout);
+	  if (usageStreaks.magic >= 5) {
+		cooldowns.magic      = 2;
+		usageStreaks.magic   = 0;
+	  }
+      [atkBtn, magBtn, restBtn, healBtn].forEach(b=>b.disabled=true);
+      player.energy -= player.magicCost;
+      if (Math.random() < 0.12) {
+        const dodgeMsg = rand(1, 2) === 1
+		? bossDisplayName + " dodged your attack!"
+		: bossDisplayName + " blocked your attack!";
+		log(dodgeMsg);
+      } else {
+        const base = rand(player.minDmg, player.maxDmg),
+              mult = rand(200,400)/100,
+              dmg  = Math.floor(base*mult);
+        log('You cast Magic and dealt ' + dmg + ' damage.');
+        boss.hp -= dmg;
+		totalDamageDealt += dmg;
+      }
+      updateUI();
+      setTimeout(() => {
+          bossAction();
+      }, 100);
+    });
+
+    restBtn.addEventListener('click', () => {
+	  usageStreaks.rest++;
+	  if (idleTimeout) clearTimeout(idleTimeout);
+	  if (usageStreaks.rest >= 3) {
+		cooldowns.rest    = 2;
+		usageStreaks.rest = 0;
+	  }
+      [atkBtn, magBtn, restBtn, healBtn].forEach(b=>b.disabled=true);
+      const eng = rand(30,67);
+      player.energy = Math.min(player.maxEnergy, player.energy+eng);
+      log('You rested and recover ' + eng + ' energy.');
+      updateUI();
+      setTimeout(bossAction, 100);
+    });
+
+healBtn.addEventListener('click', () => {
+  // realtime 30s cooldown check
+  const remaining = healCooldownRemainingSec();
+  if (remaining > 0) {
+    // show message and do nothing
+    log(`${remaining}s.`);
+    // update button text briefly (keeps UX consistent)
+    if (healBtn) {
+      healBtn.textContent = 'Heal';
+      healBtn.disabled = true;
+      setTimeout(() => {
+        // restore text in next startTurn anyway; but guard
+        if (healBtn) healBtn.textContent = 'Heal';
+      }, 1200);
+    }
+    return;
+  }
+
+  usageStreaks.heal++;
+  if (idleTimeout) clearTimeout(idleTimeout);
+  if (usageStreaks.heal >= 2) {
+    cooldowns.heal    = 1;
+    usageStreaks.heal = 0;
+  }
+
+  [atkBtn, magBtn, restBtn, healBtn].forEach(b=>b.disabled=true);
+
+  player.energy -= player.healCost;
+  const amt = rand(player.healMin, player.healMax);
+  player.hp = Math.min(player.maxHp, player.hp+amt);
+  log('You used a healing potion and healed ' + amt + ' HP.');
+  updateUI();
+
+  // record last heal timestamp (start 30s cooldown)
+  window.__lastHealTime = Date.now();
+
+  setTimeout(bossAction, 100);
+});
+
+	function bossAction() {
+	if (idleTimeout) clearTimeout(idleTimeout);
+	if (boss.hp <= 0) {
+		alert("𝚈𝚘𝚞 𝚑𝚊𝚟𝚎 𝚙𝚊𝚜𝚜𝚎𝚍 𝚝𝚑𝚎 𝚝𝚎𝚜𝚝.");
+		window.location.href = "index.html";
+		return true;
+	}
+      if (Math.random() > 0.9) {
+        const playerDodgeMessage = rand(1, 2) === 1
+		? bossDisplayName + " attacked but you dodged!"
+		: bossDisplayName + " attacked missed!";
+		log(playerDodgeMessage);
+      } else if (boss.hp > 0 && boss.hp < 900 && Math.random() > 0.8) {
+          let pct = 0;
+		  if (enraged) {
+		    if (Math.random() > 0.7) {
+				pct = rand(1.0,3.0)/100, healAmt = Math.floor(boss.maxHp*pct);
+				boss.hp = Math.min(boss.maxHp, boss.hp+healAmt);
+				log(bossDisplayName + ' regenerated ' + healAmt + ' HP.');
+			} else {
+				let bossdmg = rand(boss.minDmg, boss.maxDmg);
+				rageDamage = Math.ceil(bossdmg * 1.5);
+				if (Math.random() < 0.05) {
+					if (enraged) {
+						critDamage = Math.floor(bossdmg * 2);
+					} else {
+						critDamage = Math.floor(rageDamage * 2);
+					}
+					player.hp -= critDamage;
+					flashHealthbar();
+					const heroCritMessage = rand(1, 2) === 1 ? `Critical Hit! ${bossDisplayName} attacked and dealt ${critDamage} damage.` : `${bossDisplayName} caught you off guard and dealt ${critDamage} critical damage!`;
+					log(heroCritMessage);
+				} else {
+					if (enraged) {
+						player.hp -= rageDamage;
+					} else {
+						player.hp -= bossdmg;
+					}
+					if (enraged) {
+						log(`${bossDisplayName} attacked and dealt ${rageDamage} damage!`);
+					} else {
+						log(`${bossDisplayName} attacked and dealt ${bossdmg} damage!`);
+					}
+				}
+			}
+		  } else {
+		    if (Math.random() > 0.33) {
+				pct = rand(1.0,4.0)/100, healAmt = Math.floor(boss.maxHp*pct);
+				boss.hp = Math.min(boss.maxHp, boss.hp+healAmt);
+				log(bossDisplayName + ' used a potion and healed ' + healAmt + ' HP.');
+			} else {
+				log(bossDisplayName + ' got tired and took a break.');
+			}
+		  }
+          updateUI();
+	  }  else {
+			let bossdmg = rand(boss.minDmg, boss.maxDmg);
+			rageDamage = Math.ceil(bossdmg * 1.5);
+			if (Math.random() < 0.05) {
+				if (enraged) {
+					critDamage = Math.floor(bossdmg * 2);
+				} else {
+					critDamage = Math.floor(rageDamage * 2);
+				}
+				player.hp -= critDamage;
+				flashHealthbar();
+				const heroCritMessage = rand(1, 2) === 1 ? `Critical Hit! ${bossDisplayName} attacked and dealt ${critDamage} damage.` : `${bossDisplayName} caught you off guard and dealt ${critDamage} critical damage!`;
+				log(heroCritMessage);
+			} else {
+				if (enraged) {
+					player.hp -= rageDamage;
+				} else {
+					player.hp -= bossdmg;
+				}
+				if (enraged) {
+					log(`${bossDisplayName} attacked and dealt ${rageDamage} damage!`);
+				} else {
+					log(`${bossDisplayName} attacked and dealt ${bossdmg} damage!`);
+				}
+			}
+		}
+      updateUI();
+	  turn++;
+      setTimeout(startTurn, 500);
+}
+
+let cx = 0, cy = 0, frozen = false;
+
+// create vertical line (hidden by default)
+const vLine = document.createElement('div');
+vLine.className = 'attack-marker boss-rainbow'; // clones will carry this
+Object.assign(vLine.style, {
+  position: 'absolute', top: '0', width: '2px', height: '100%',
+  background: 'rgba(255,0,0,0.5)', pointerEvents: 'none',
+  transition: 'background 0.1s, width 0.1s, height 0.1s',
+  display: 'none',
+  zIndex: '10000'
+});
+document.body.appendChild(vLine);
+
+// create horizontal line (hidden by default)
+const hLine = document.createElement('div');
+hLine.className = 'attack-marker boss-rainbow';
+Object.assign(hLine.style, {
+  position: 'absolute', left: '0', height: '2px', width: '100%',
+  background: 'rgba(255,0,0,0.5)', pointerEvents: 'none',
+  transition: 'background 0.1s, width 0.1s, height 0.1s',
+  display: 'none',
+  zIndex: '10000'
+});
+document.body.appendChild(hLine);
+
+// track mouse
+document.addEventListener('mousemove', e => {
+  cx = e.clientX;
+  cy = e.clientY;
+  if (!frozen && vLine.style.display === 'block') {
+    vLine.style.left = (cx - vLine.offsetWidth/2) + 'px';
+    hLine.style.top  = (cy - hLine.offsetHeight/2) + 'px';
+  }
+});
+
+window.__activeSpecialCount = 0;
+window.__specialIntervals = window.__specialIntervals || [];
+window.__specialIntervalsInitialized = window.__specialIntervalsInitialized || false;
+
+function tryStartSpecial(attackFn) {
+  if (window.__activeSpecialCount >= 3) return false;
+  window.__activeSpecialCount++;
+  try {
+    attackFn(() => {
+      // ensure count decremented when attack completes
+      window.__activeSpecialCount = Math.max(0, window.__activeSpecialCount - 1);
+    });
+    return true;
+  } catch (e) {
+    // in case the attack throws, ensure we free the slot
+    window.__activeSpecialCount = Math.max(0, window.__activeSpecialCount - 1);
+    return false;
+  }
+}
+
+/**
+ * Create the intervals that trigger special attacks.
+ * This is called once when the battle begins so special attacks are active immediately.
+ */
+function setupSpecialIntervals() {
+  if (window.__specialIntervalsInitialized) return;
+  window.__specialIntervalsInitialized = true;
+
+  // helper to push an interval id so we can clear them later
+  function pushInterval(id) { window.__specialIntervals.push(id); }
+
+  // Crosshair attack (moderate chance)
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.11) {
+      tryStartSpecial(done => bossCrosshairAttack(3, done));
+    }
+  }, 5000));
+
+  // Random crosshair bursts
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.10) {
+      tryStartSpecial(done => bossCrosshairRandomAttack(done));
+    }
+  }, 5000));
+
+  // Batch crosshair waves
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.09) {
+      tryStartSpecial(done => bossCrosshairBatchAttack(5, done));
+    }
+  }, 5000));
+
+  // Wave attack variant
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.08) {
+      tryStartSpecial(done => bossCrosshairWaveAttackVariant(4, done));
+    }
+  }, 5000));
+
+  // Rotating laser (rarer)
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.06) {
+      tryStartSpecial(done => bossRotatingLaserAttack(done));
+    }
+  }, 5000));
+
+  // Vertical line barrage
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.07) {
+      tryStartSpecial(done => bossVerticalLineAttack(done));
+    }
+  }, 5000));
+
+  // Random line attack (shorter burst)
+  pushInterval(setInterval(() => {
+    if (Math.random() < 0.05) {
+      tryStartSpecial(done => bossRandomLineAttack(done));
+    }
+  }, 7000));
+}
+
+window.__enrageIntervalsInitialized = window.__enrageIntervalsInitialized || false;
+window.__enrageIntervals = window.__enrageIntervals || [];
+
+function setupEnrageIntervals() {
+  if (window.__enrageIntervalsInitialized) return;
+  window.__enrageIntervalsInitialized = true;
+
+  // helper to keep track so clearActiveLineAttacks can clear them
+  const push = id => window.__enrageIntervals.push(id);
+
+  // these probabilities roughly match your previous ones but they are now
+  // only registered once and will be managed by the concurrency manager.
+  // Crosshair attack (moderate chance)
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.12) {
+      log("The Previous Hero began to charge up some powerful attacks! Be careful!");
+      tryStartSpecial(done => bossCrosshairAttack(3, done));
+    }
+  }, 5000));
+
+  // Random crosshair bursts
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.11) {
+      log("The Previous Hero began to charge up some powerful attacks! Be careful!");
+      tryStartSpecial(done => bossCrosshairRandomAttack(done));
+    }
+  }, 5000));
+
+  // Batch crosshair waves
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.09) {
+      log("The Previous Hero began to charge up some powerful attacks! Be careful!");
+      tryStartSpecial(done => bossCrosshairBatchAttack(5, done));
+    }
+  }, 5000));
+
+  // Wave attack variant
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.07) {
+      log("The Previous Hero began to charge up a barrage of attacks!");
+      tryStartSpecial(done => bossCrosshairWaveAttack(4, done));
+    }
+  }, 5000));
+
+  // Another wave/variant (kept slightly rarer)
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.06) {
+      log("The Previous Hero began to charge up a barrage of attacks!");
+      tryStartSpecial(done => bossCrosshairWaveAttackVariant(4, done));
+    }
+  }, 5000));
+
+  // Rotating laser (rarer)
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.04) {
+      log("The Previous Hero began charging up a powerful magic attack! Be careful!");
+      tryStartSpecial(done => bossRotatingLaserAttack(done));
+    }
+  }, 5000));
+
+  // Vertical line barrage (rare)
+  push(setInterval(() => {
+    if (!enraged) return;
+    if (Math.random() < 0.02) {
+      log("The Previous Hero began to fire some magical attacks into the air! Careful when they land!");
+      tryStartSpecial(done => bossVerticalLineAttack(done));
+    }
+  }, 5000));
+}
+
+function clearSpecialIntervals() {
+  if (Array.isArray(window.__specialIntervals)) {
+    window.__specialIntervals.forEach(id => clearInterval(id));
+    window.__specialIntervals = [];
+  }
+  window.__specialIntervalsInitialized = false;
+  window.__activeSpecialCount = 0;
+}
+
+// ——— BLINK→RAMP→FREEZE→FLASH ———
+function runCycle(onComplete) {
+  if (checkEnd()) return;
+  // show crosshair
+  vLine.style.display = 'block';
+  hLine.style.display = 'block';
+
+  frozen = false;
+  vLine.style.width = '2px';
+  hLine.style.height = '2px';
+  vLine.style.background = hLine.style.background = 'rgba(255,0,0,0.5)';
+
+  const start = performance.now();
+  let interval = 500, nextToggle = start + interval;
+  let visibleRed = true;
+
+  function tick(now) {
+    if (now >= nextToggle) {
+      visibleRed = !visibleRed;
+      const col = visibleRed ? 'rgba(255,0,0,0.5)' : 'rgba(255,255,255,0.5)';
+      vLine.style.background = hLine.style.background = col;
+
+      const elapsed = now - start;
+      if (elapsed < 1800) {
+        const frac = elapsed / 1800;
+        interval = 500 - (400 * frac);
+        nextToggle = now + interval;
+        requestAnimationFrame(tick);
+      } else {
+        frozen = true;
+        vLine.style.left = (cx - vLine.offsetWidth/2) + 'px';
+        hLine.style.top  = (cy - hLine.offsetHeight/2) + 'px';
+        freezeAndFlash(onComplete);
+      }
+    } else {
+      requestAnimationFrame(tick);
+    }
+  }
+  requestAnimationFrame(tick);
+}
+
+function freezeAndFlash(done) {
+  const width = rand(40,60);
+  vLine.style.background = hLine.style.background = 'rgba(255,255,255,0.5)';
+  setTimeout(() => {
+    vLine.style.width  = `${width}px`;
+	vLine.style.border = '1px solid #4f0500';
+    hLine.style.height = `${width}px`;
+	hLine.style.border = '1px solid #4f0500';
+    vLine.style.background = hLine.style.background = 'rgba(255,0,0,1)';
+
+    const half = 5;
+    const dx = Math.abs(cx - parseInt(vLine.style.left) - half);
+    const dy = Math.abs(cy - parseInt(hLine.style.top)  - half);
+    if (dx <= half || dy <= half) {
+      player.hp = Math.max(0, player.hp - 50);
+	  log(`You were hit and took 50 damage!`);
+      updateUI();
+    }
+
+    setTimeout(() => {
+      vLine.style.background = hLine.style.background = 'transparent';
+      setTimeout(done, 200);
+    }, 100);
+  }, 500);
+}
+
+
+// ——— NEW bossCrosshairAttack ———
+function bossCrosshairAttack(cycles, onComplete) {
+  let count = 0;
+
+  function nextCycle() {
+    // disable inputs
+
+    runCycle(() => {
+      count++;
+      if (count < cycles) {
+        frozen = false;
+        nextCycle();
+      } else {
+        // hide crosshair and re-enable inputs
+        vLine.style.display = 'none';
+        hLine.style.display = 'none';
+        onComplete();
+      }
+    });
+  }
+
+  nextCycle();
+}
+
+function bossCrosshairRandomAttack(onComplete) {
+  const CYCLES          = 3;
+  const PER_CYCLE       = 5;
+  const SPAWN_INTERVAL  = 150;   // 0.2s between each spawn
+  const DET_DELAY       = 500;  // 1s after spawn → detonate
+  const POST_CYCLE_WAIT = 1000;   // 0.67s between cycles
+  const THICK_PX        = 20;
+  const HALF_THICK      = THICK_PX / 4;
+  const FADE_DURATION   = 500;
+
+  let cycle = 0;
+
+  function runCycle() {
+    if (cycle >= CYCLES) {
+      return onComplete();
+    }
+	if (checkEnd()) return;
+
+    cycle++;
+    let spawned = 0;
+
+    function spawnCrosshair() {
+      if (spawned >= PER_CYCLE) {
+        // After last one spawns, wait 0.67s then start next cycle
+        return setTimeout(runCycle, POST_CYCLE_WAIT);
+      }
+
+      spawned++;
+
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+
+      const v = vLine.cloneNode(), h = hLine.cloneNode();
+      Object.assign(v.style, {
+        display: 'block',
+        left: `${x - 1}px`,
+        width: '2px',
+        background: 'rgba(255,0,0,0.5)',
+        transition: 'none'
+      });
+      Object.assign(h.style, {
+        display: 'block',
+        top: `${y - 1}px`,
+        height: '2px',
+        background: 'rgba(255,0,0,0.5)',
+        transition: 'none'
+      });
+      document.body.append(v, h);
+
+      // Detonate this crosshair after 1 second
+      setTimeout(() => {
+        Object.assign(v.style, {
+          width: `${THICK_PX}px`,
+          left: `${x - HALF_THICK}px`,
+          background: 'red'
+        });
+        Object.assign(h.style, {
+          height: `${THICK_PX}px`,
+          top: `${y - HALF_THICK}px`,
+          background: 'red'
+        });
+
+        if (Math.abs(cx - x) <= HALF_THICK || Math.abs(cy - y) <= HALF_THICK) {
+          player.hp = Math.max(0, player.hp - 40);
+		  log(`You were hit and took 40 damage!`);
+          updateUI();
+        }
+
+        v.style.transition = h.style.transition = `opacity ${FADE_DURATION}ms ease`;
+        v.style.opacity = h.style.opacity = '0';
+
+        setTimeout(() => {
+          v.remove(); h.remove();
+        }, FADE_DURATION);
+      }, DET_DELAY);
+
+      // Schedule next spawn in this cycle
+      setTimeout(spawnCrosshair, SPAWN_INTERVAL);
+    }
+
+    spawnCrosshair();
+  }
+
+  runCycle();
+}
+
+function bossCrosshairBatchAttack(count, onComplete) {
+  const SPAWN_INTERVAL = 200; // ms between spawns
+  const DET_DELAY      = 400; // ms after all spawned before detonation
+  const THICK_PX       = 40;
+  const HALF_THICK     = THICK_PX / 4;
+  const FADE_DURATION  = 500;
+  const CYCLES         = 3;
+
+  let currentCycle = 0;
+
+  function runCycle() {
+    if (currentCycle >= CYCLES) {
+      return onComplete();
+    }
+    currentCycle++;
+    const markers = [];
+    let spawned = 0;
+
+    function spawnOne() {
+      if (spawned >= count) {
+        // all spawned: wait then detonate
+        return setTimeout(detonateAll, DET_DELAY);
+      }
+      spawned++;
+      const x = Math.random() * window.innerWidth;
+      const y = Math.random() * window.innerHeight;
+      const v = vLine.cloneNode(), h = hLine.cloneNode();
+      Object.assign(v.style, {
+        display: 'block',
+        left:    `${x - 1}px`,
+        width:   '2px',
+        background: 'rgba(255,0,0,0.5)',
+        transition: 'none'
+      });
+      Object.assign(h.style, {
+        display: 'block',
+        top:     `${y - 1}px`,
+        height:  '2px',
+        background: 'rgba(255,0,0,0.5)',
+        transition: 'none'
+      });
+      document.body.append(v, h);
+      markers.push({ x, y, v, h });
+      setTimeout(spawnOne, SPAWN_INTERVAL);
+    }
+
+    function detonateAll() {
+      // thicken & damage
+      markers.forEach(({ x, y, v, h }) => {
+        Object.assign(v.style, {
+          width:      `${THICK_PX}px`,
+          left:       `${x - HALF_THICK}px`,
+          background: 'red'
+        });
+        Object.assign(h.style, {
+          height:     `${THICK_PX}px`,
+          top:        `${y - HALF_THICK}px`,
+          background: 'red'
+        });
+        if (Math.abs(cx - x) <= HALF_THICK || Math.abs(cy - y) <= HALF_THICK) {
+          player.hp = Math.max(0, player.hp - 40);
+		  log(`You were hit and took 40 damage!`);
+          updateUI();
+        }
+      });
+      // fade all out
+      markers.forEach(({ v, h }) => {
+        v.style.transition = h.style.transition = `opacity ${FADE_DURATION}ms ease`;
+        v.style.opacity = h.style.opacity = '0';
+      });
+      setTimeout(() => {
+        markers.forEach(({ v, h }) => { v.remove(); h.remove(); });
+        runCycle();
+      }, FADE_DURATION);
+    }
+
+    spawnOne();
+  }
+
+  runCycle();
+}
+
+function bossCrosshairWaveAttack(cycles, onComplete) {
+  const COLORS = ['red','blue','yellow','green','purple','white','pink'];
+  const SPAWN_INTERVAL    = 20;
+  const SPAWN_DURATION    = 2000;
+  const ACTIVATION_DELAY  = 400;
+  const THICK_PX          = 30;
+  const HALF              = THICK_PX / 4;
+
+  let currentCycle = 0;
+
+  function runOneCycle() {
+  if (checkEnd()) return;
+    if (currentCycle >= cycles) {
+      // all done
+      return onComplete();
+    }
+
+    const spawns = [];
+    // start spawning translucent markers
+    const spawnTimer = setInterval(() => {
+      const x = cx, y = cy;
+      // pick random color for this spawn
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+      // clone base lines
+      const elV = vLine.cloneNode();
+      const elH = hLine.cloneNode();
+      Object.assign(elV.style, {
+        display:    'block',
+        left:       `${x - elV.offsetWidth/2}px`,
+        width:      '2px',
+        background: 'rgba(255,0,0,0.5)',
+        opacity:    '1',
+        transition: 'none'
+      });
+      Object.assign(elH.style, {
+        display:    'block',
+        top:        `${y - elH.offsetHeight/2}px`,
+        height:     '2px',
+        background: 'rgba(255,0,0,0.5)',
+        opacity:    '1',
+        transition: 'none'
+      });
+      document.body.append(elV, elH);
+      spawns.push({ x, y, color, elV, elH });
+    }, SPAWN_INTERVAL);
+
+    // after spawn duration, activate each marker
+    setTimeout(() => {
+      clearInterval(spawnTimer);
+
+      if (spawns.length === 0) {
+        currentCycle++;
+        return runOneCycle();
+      }
+
+      let done = 0;
+      spawns.forEach(({ x, y, color, elV, elH }) => {
+        setTimeout(() => {
+          // flash to thick, opaque, spawn-specific color
+          Object.assign(elV.style, {
+            left:       `${x - HALF}px`,
+            width:      `${THICK_PX}px`,
+            background: color
+          });
+          Object.assign(elH.style, {
+            top:        `${y - HALF}px`,
+            height:     `${THICK_PX}px`,
+            background: color
+          });
+
+          // damage check (2 HP)
+          if (Math.abs(cx - x) <= HALF || Math.abs(cy - y) <= HALF) {
+            player.hp = Math.max(0, player.hp - 5);
+			log("You were hit by one of the attacks!");
+            updateUI();
+          }
+
+          // remove after brief flash
+          elV.style.transition = 'opacity 0.5s ease';
+		  elH.style.transition = 'opacity 0.5s ease';
+		  elV.style.opacity = '0';
+		  elH.style.opacity = '0';
+
+		  setTimeout(() => {
+			elV.remove();
+			elH.remove();
+			done++;
+			if (done === spawns.length) {
+			  currentCycle++;
+			  runOneCycle();
+			}
+		  }, 500);
+        }, ACTIVATION_DELAY);
+      });
+    }, SPAWN_DURATION);
+  }
+
+  runOneCycle();
+}
+
+function bossRandomLineAttack(onComplete) {
+  const DURATION_MS = rand(4000, 6000);
+  const DAMAGE_DURATION = 100; // 0.1s
+  const FADE_DURATION = 500;   // 0.5s
+
+  const endTime = Date.now() + DURATION_MS;
+
+  function spawnLine() {
+	if (checkEnd()) return;
+    const angle = rand(0, 360); // degrees
+    const length = Math.hypot(window.innerWidth, window.innerHeight) * 1.5;
+    const x = rand(0, window.innerWidth);
+    const y = rand(0, window.innerHeight);
+	const thickness = rand(2, 5);
+
+    const line = document.createElement('div');
+    Object.assign(line.style, {
+      position: 'fixed',
+      left: `${x}px`,
+      top: `${y}px`,
+      width: `${length}px`,
+      height: `${thickness}px`,
+      background: '#b500a0',
+      transform: `rotate(${angle}deg) translateX(-50%)`,
+      transformOrigin: 'left center',
+      pointerEvents: 'none',
+      zIndex: 9999,
+      opacity: '1',
+      transition: `opacity ${FADE_DURATION}ms ease`
+    });
+
+    document.body.appendChild(line);
+
+    // Damage detection
+    const damageTimer = setTimeout(() => {
+      const rect = line.getBoundingClientRect();
+      const dx = cx - rect.left;
+      const dy = cy - rect.top;
+      const distanceToLine = Math.abs(dy * Math.cos(angle * Math.PI / 180) - dx * Math.sin(angle * Math.PI / 180));
+      if (distanceToLine <= 2) {
+        player.hp = Math.max(0, player.hp - 20);
+        updateUI();
+        flashHealthbar();
+      }
+    }, DAMAGE_DURATION);
+
+    // Fade and remove
+    setTimeout(() => {
+      line.style.opacity = '0';
+      setTimeout(() => line.remove(), FADE_DURATION);
+    }, DAMAGE_DURATION);
+  }
+
+  function attackLoop() {
+    if (Date.now() >= endTime) {
+      onComplete();
+      return;
+    }
+    spawnLine();
+    setTimeout(attackLoop, rand(200, 500));
+  }
+  attackLoop();
+}
+
+function bossCrosshairWaveAttackVariant(cycles, onComplete) {
+  const COLORS           = ['red','blue','yellow','green','purple','white','pink'];
+  const SPAWN_INTERVAL   = 20;    // ms between spawns
+  const SPAWN_DURATION   = 1500;  // total spawning time
+  const ACT_DELAY        = 300;   // ms after spawn → detonate
+  const FADE_DELAY       = 1000;  // ms after spawn → start fade
+  const FADE_DURATION    = 500;   // ms fade-out time
+  const THICK_PX         = 20;
+  const HALF             = THICK_PX / 4;
+
+  let currentCycle = 0;
+
+  function runOneCycle() {
+    if (currentCycle >= cycles) {
+      return onComplete();
+    }
+	if (checkEnd()) return;
+
+    let spawnCount = 0;
+    let completed  = 0;
+    let spawning   = true;
+
+    const spawnTimer = setInterval(() => {
+      if (!spawning) return;
+
+      // record spawn
+      spawnCount++;
+      const x     = cx;
+      const y     = cy;
+      const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+      // clone and position translucent marker
+      const elV = vLine.cloneNode();
+      const elH = hLine.cloneNode();
+      Object.assign(elV.style, {
+        display:    'block',
+        left:       `${x - elV.offsetWidth/2}px`,
+        width:      '2px',
+        background: 'rgba(255,0,0,0.5)',
+        opacity:    '1',
+        transition: 'none'
+      });
+      Object.assign(elH.style, {
+        display:    'block',
+        top:        `${y - elH.offsetHeight/2}px`,
+        height:     '2px',
+        background: 'rgba(255,0,0,0.5)',
+        opacity:    '1',
+        transition: 'none'
+      });
+      document.body.append(elV, elH);
+
+      // schedule this line’s detonation
+      setTimeout(() => {
+        Object.assign(elV.style, {
+          left:       `${x - HALF}px`,
+          width:      `${THICK_PX}px`,
+          background: color
+        });
+        Object.assign(elH.style, {
+          top:        `${y - HALF}px`,
+          height:     `${THICK_PX}px`,
+          background: color
+        });
+        if (Math.abs(cx - x) <= HALF || Math.abs(cy - y) <= HALF) {
+          player.hp = Math.max(0, player.hp - 5);
+          updateUI();
+        }
+      }, ACT_DELAY);
+
+      // schedule fade-out 1 s after spawn
+      setTimeout(() => {
+        elV.style.transition = `opacity ${FADE_DURATION}ms ease`;
+        elH.style.transition = `opacity ${FADE_DURATION}ms ease`;
+        elV.style.opacity    = '0';
+        elH.style.opacity    = '0';
+      }, FADE_DELAY);
+
+      // schedule removal + cycle completion check
+      setTimeout(() => {
+        elV.remove();
+        elH.remove();
+        completed++;
+        // if spawning has ended and we've removed all spawns, next cycle
+        if (!spawning && completed === spawnCount) {
+          currentCycle++;
+          runOneCycle();
+        }
+      }, FADE_DELAY + FADE_DURATION);
+    }, SPAWN_INTERVAL);
+
+    // stop spawning after SPAWN_DURATION
+    setTimeout(() => {
+      spawning = false;
+      clearInterval(spawnTimer);
+      // if nothing spawned, immediately move to next cycle
+      if (spawnCount === 0) {
+        currentCycle++;
+        runOneCycle();
+      }
+    }, SPAWN_DURATION);
+  }
+
+  runOneCycle();
+}
+
+function bossVerticalLineAttack(onComplete) {
+  const TOTAL_LINES    = 50;
+  const SPAWN_INTERVAL = 90;
+  const DET_DELAY      = 500;
+  const FADE_DURATION  = 500;
+  const THICK_PX       = 30;
+  const HALF_THICK     = THICK_PX / 4;
+  const COLORS         = ['red','blue','yellow','green','purple','white','pink'];
+
+  let spawnedCount = 0;
+  let removedCount = 0;
+
+  function spawnOne() {
+    if (spawnedCount >= TOTAL_LINES) return;
+	if (checkEnd()) return;
+    spawnedCount++;
+
+    // pick random X and a random color for this line
+    const spawnX = Math.random() * window.innerWidth;
+    const color  = COLORS[Math.floor(Math.random() * COLORS.length)];
+
+    // clone a thin marker (2px wide by default)
+    const el = vLine.cloneNode();
+    Object.assign(el.style, {
+      display:    'block',
+      top:        '0',
+      left:       `${spawnX - 1}px`,        // center the 2px thin line
+      width:      '2px',
+      height:     '100%',
+      background: 'rgba(255,0,0,0.5)',      // warning red
+      opacity:    '1',
+      transition: 'none'
+    });
+    document.body.append(el);
+
+    // schedule detonation and colorize + thickness
+    setTimeout(() => {
+      Object.assign(el.style, {
+        width:      `${THICK_PX}px`,
+        left:       `${spawnX - HALF_THICK}px`,
+        background: color,
+        opacity:    '1'
+      });
+
+      // damage check (± HALF_THICK)
+      if (Math.abs(cx - spawnX) <= HALF_THICK) {
+        player.hp = Math.max(0, player.hp - 33);
+        updateUI();
+      }
+
+      // fade out over FADE_DURATION
+      el.style.transition = `opacity ${FADE_DURATION}ms ease`;
+      el.style.opacity    = '0';
+
+      // remove after fade
+      setTimeout(() => {
+        el.remove();
+        removedCount++;
+        if (removedCount === TOTAL_LINES && spawnedCount === TOTAL_LINES) {
+          // re-enable and advance turn
+          onComplete();
+        }
+      }, FADE_DURATION);
+    }, DET_DELAY);
+
+    // schedule next spawn
+    if (spawnedCount < TOTAL_LINES) {
+      setTimeout(spawnOne, SPAWN_INTERVAL);
+    }
+  }
+
+  // kick off the first line
+  spawnOne();
+}
+
+function bossRotatingLaserAttack(onComplete) {
+  const THICK_PX         = 120;
+  const HALF_THICK       = THICK_PX / 12;
+  const DOT_SIZE         = THICK_PX * 2;
+  const BLINK_INTERVAL   = 250;
+  const WARNING_DURATION = 670;
+  const DAMAGE_INTERVAL  = 10;
+  const DAMAGE_PER_TICK  = 5;
+  const START_SPEED      = 0.1;
+  const MAX_SPEED_FACTOR = 1;
+  const END_SLOWDOWN_DEG = 30;
+  const TOTAL_ANGLE      = 1320;
+  const ACCEL_ANGLE      = 180 ;
+  const FADE_DURATION    = 500;
+
+  const cx0 = window.innerWidth  / 2;
+  const cy0 = window.innerHeight / 2;
+
+  const dot = document.createElement('div');
+  Object.assign(dot.style, {
+    position:       'absolute',
+    width:          `${DOT_SIZE}px`,
+    height:         `${DOT_SIZE}px`,
+    borderRadius:   '50%',
+    border:         '2px solid #440047',
+    background:     '#b500a0',
+    left:           `${cx0 - DOT_SIZE / 2}px`,
+    top:            `${cy0 - DOT_SIZE / 2}px`,
+    pointerEvents:  'none',
+    zIndex:         '1001',
+    transition:     'background 0.1s, width 0.3s ease, height 0.3s ease, left 0.3s ease, top 0.3s ease'
+  });
+  document.body.append(dot);
+
+  let showRed = true;
+  const blinkTimer = setInterval(() => {
+    dot.style.background = showRed ? 'white' : '#b500a0';
+    showRed = !showRed;
+  }, BLINK_INTERVAL);
+
+  setTimeout(() => {
+    clearInterval(blinkTimer);
+    Object.assign(dot.style, {
+      width:        `${THICK_PX}px`,
+      height:       `${THICK_PX}px`,
+      left:         `${cx0 - HALF_THICK}px`,
+      top:          `${cy0 - HALF_THICK}px`,
+      background:   '#b500a0'
+    });
+
+    const beam = document.createElement('div');
+    Object.assign(beam.style, {
+      position:        'absolute',
+      width:           `${THICK_PX}px`,
+      height:          '5000px',
+      background:      '#b500a0',
+      border:          '1px solid #440047',
+      borderRadius:    `${THICK_PX}px`,
+      pointerEvents:   'none',
+      transformOrigin: 'center bottom',
+      left:            `${cx0 - HALF_THICK}px`,
+      bottom:          `${cy0}px`,
+      transform:       'rotate(0deg)',
+      zIndex:          '1000',
+      transition:      `opacity ${FADE_DURATION}ms ease`
+    });
+    document.body.append(beam);
+
+    let currentAngle = 0;
+    const direction = Math.random() < 0.5 ? 1 : -1;
+    let lastTime = null;
+
+    const damageTimer = setInterval(() => {
+      const rad = (currentAngle * Math.PI) / 180;
+      const ux = Math.sin(rad), uy = -Math.cos(rad);
+      const vx = cx - cx0, vy = cy - cy0;
+      const perpDist = Math.abs(vx * uy - vy * ux);
+      const fwdDist = vx * ux + vy * uy;
+      if (fwdDist > 0 && perpDist <= HALF_THICK) {
+        player.hp = Math.max(0, player.hp - DAMAGE_PER_TICK);
+        updateUI();
+      }
+	  if (checkEnd()) return;
+    }, DAMAGE_INTERVAL);
+
+    function step(time) {
+      if (lastTime == null) lastTime = time;
+      const dt = time - lastTime;
+      const absAngle = Math.abs(currentAngle);
+
+      // speed ramps up until ACCEL_ANGLE, then down near end
+      let factor = 1;
+      if (absAngle < ACCEL_ANGLE) {
+        factor = 1 + ((MAX_SPEED_FACTOR - 1) * (absAngle / ACCEL_ANGLE));
+      } else if (absAngle > TOTAL_ANGLE - END_SLOWDOWN_DEG) {
+        const slowRatio = (TOTAL_ANGLE - absAngle) / END_SLOWDOWN_DEG;
+        factor = 1 + ((MAX_SPEED_FACTOR - 1) * slowRatio);
+      } else {
+        factor = MAX_SPEED_FACTOR;
+      }
+
+      const speed = START_SPEED * factor;
+      currentAngle += direction * speed * dt;
+      beam.style.transform = `rotate(${currentAngle}deg)`;
+
+      if (Math.abs(currentAngle) < TOTAL_ANGLE) {
+        lastTime = time;
+        requestAnimationFrame(step);
+      } else {
+        // Begin fade-out
+        clearInterval(damageTimer);
+        beam.style.opacity = '0';
+        setTimeout(() => {
+          beam.remove();
+          dot.remove();
+          onComplete();
+        }, FADE_DURATION);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }, WARNING_DURATION);
+}
+
+function triggerEnrageSequence() {
+  // stop any ongoing attack markers
+  clearActiveLineAttacks();
+
+  // temporarily disable inputs
+  [atkBtn, magBtn, restBtn, healBtn].forEach(b => b.disabled = true);
+
+  // short dramatic pause, then flip enraged = true and resume
+  setTimeout(() => {
+    alert('...');
+    setTimeout(() => {
+	  enraged = true;
+	  // ensure enrage-only intervals are registered exactly once
+	  if (typeof setupEnrageIntervals === 'function') setupEnrageIntervals();
+	  showJumpscare();
+	  startJumpscareTicker();
+	  log("𝙸𝚖𝚙𝚛𝚎𝚜𝚜𝚒𝚟𝚎.");
+      setTimeout(() => {
+        [atkBtn, magBtn, restBtn, healBtn].forEach(b => b.disabled = false);
+		if (restBtn) { restBtn.style.display = 'none'; restBtn.disabled = true; }
+		if (healBtn) { healBtn.style.display = 'none'; healBtn.disabled = true; }
+
+		// Immediately update energy regen to doubled rate
+		if (typeof window.__setupMpRegenInterval === 'function') {
+		  window.__setupMpRegenInterval();
+		}
+        updateUI();
+		turn++;
+		startTurn();
+      }, 1000);
+    }, 1500);
+  }, 500);
+}
+  
+function clearActiveLineAttacks() {
+  // remove only elements we explicitly created for telegraphs
+  document.querySelectorAll('.attack-marker').forEach(el => el.remove());
+
+  // clear any named interval used for random line attacks
+  if (typeof randomLineAttackInterval !== 'undefined' && randomLineAttackInterval) {
+    clearInterval(randomLineAttackInterval);
+    randomLineAttackInterval = null;
+  }
+
+  // clear stored enrage/special intervals if any
+  if (Array.isArray(window.__enrageIntervals) && window.__enrageIntervals.length) {
+    window.__enrageIntervals.forEach(id => clearInterval(id));
+    window.__enrageIntervals = [];
+  }
+  
+  clearSpecialIntervals();
+  
+  window.__activeSpecialCount = 0;
+}
+
+window.__lastJumpscareTime = window.__lastJumpscareTime || 0;
+window.__jumpscareInterval = window.__jumpscareInterval || null;
+window.__jumpscareShaking = window.__jumpscareShaking || false;
+
+function showJumpscare() {
+  if (typeof checkEnd === 'function' && checkEnd()) return;
+  if (document.querySelector('.nameless-jumpscare')) return; // already visible
+
+  // record last time (enforces cooldown)
+  window.__lastJumpscareTime = Date.now();
+
+  // create centered GIF (30% larger than before)
+  const img = document.createElement('img');
+  img.src = 'nameless.gif';
+  img.alt = 'nameless';
+  img.className = 'nameless-jumpscare';
+  Object.assign(img.style, {
+    position: 'fixed',
+    left: '50%',
+    top: '45%',
+    transform: 'translate(-50%, -50%)',
+    pointerEvents: 'none',
+    zIndex: '900',             // ABOVE normal UI, BELOW special-attacks (1000+)
+    width: '850px',            // increased by ~30%
+    maxWidth: '78vw',
+    height: 'auto',
+    display: 'block',
+    opacity: '1',
+    transition: '' // transitions applied later
+  });
+
+  // audio
+  const audio = new Audio('screamofgod.mp3');
+  audio.loop = false;
+  audio.preload = 'auto';
+  audio.volume = (typeof audio.volume === 'number') ? audio.volume : 1;
+  audio.play().catch(() => { /* autoplay blocked; ignore */ });
+
+  // append
+  document.body.appendChild(img);
+
+  // ---- LIGHT, FREQUENT SHAKE for first 2 seconds ----
+  if (!window.__jumpscareShaking) {
+    window.__jumpscareShaking = true;
+    const shakeDuration = 2000; // ms (first 2s)
+    const magnitude = 16;        // px (smaller, but frequent — "very shaky")
+    const start = performance.now();
+    const origBodyTransform = document.body.style.transform || '';
+    const origBodyTransition = document.body.style.transition || '';
+
+    function shakeFrame(now) {
+      const elapsed = now - start;
+      if (elapsed < shakeDuration) {
+        // small jitter (no rotation)
+        const dx = (Math.random() - 0.5) * magnitude * 2;
+        const dy = (Math.random() - 0.5) * magnitude * 2;
+        document.body.style.transform = `translate(${dx}px, ${dy}px)`;
+        requestAnimationFrame(shakeFrame);
+      } else {
+        // smoothly restore body transform
+        document.body.style.transition = 'transform 200ms ease-out';
+        document.body.style.transform = origBodyTransform;
+        setTimeout(() => {
+          document.body.style.transition = origBodyTransition;
+          window.__jumpscareShaking = false;
+        }, 220);
+      }
+    }
+    requestAnimationFrame(shakeFrame);
+  }
+
+  // ---- BOSS UI fade: start at t = 2000ms, fade over 1000ms ----
+  const bossBar = document.getElementById('boss-bar');
+  const origBossTransition = bossBar ? bossBar.style.transition : '';
+  const origBossOpacity = bossBar ? (bossBar.style.opacity || '') : '';
+
+  setTimeout(() => {
+    // Fade GIF out over 1s
+    img.style.transition = 'opacity 1000ms linear';
+    img.style.opacity = '0';
+
+    // Fade boss UI out (if it exists)
+    if (bossBar) {
+      bossBar.style.transition = 'opacity 1000ms linear';
+      bossBar.style.opacity = '0';
+    }
+  }, 2000);
+
+  // ---- cleanup: after 3s, remove gif & audio and restore boss UI ----
+  setTimeout(() => {
+    try { img.remove(); } catch (e) {}
+    try { audio.pause(); audio.currentTime = 0; } catch (e) {}
+
+    // restore boss UI (fade back in)
+    if (bossBar) {
+      bossBar.style.transition = 'opacity 600ms linear';
+      bossBar.style.opacity = '1';
+      setTimeout(() => {
+        bossBar.style.transition = origBossTransition;
+        if (origBossOpacity !== '') bossBar.style.opacity = origBossOpacity;
+      }, 700);
+    }
+  }, 3000);
+}
+
+function startJumpscareTicker() {
+  if (window.__jumpscareInterval) return; // already running
+  window.__jumpscareInterval = setInterval(() => {
+    const last = window.__lastJumpscareTime || 0;
+    if (Date.now() - last < 30000) return; // 30s cooldown
+    if (Math.random() < 0.01) {
+      showJumpscare();
+    }
+  }, 1000);
+}
+
+function stopJumpscareTicker() {
+  if (window.__jumpscareInterval) {
+    clearInterval(window.__jumpscareInterval);
+    window.__jumpscareInterval = null;
+  }
+}
+
+  function formatDuration(ms) {
+    let totalSec = Math.floor(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    totalSec %= 3600;
+    const m = Math.floor(totalSec / 60);
+    const s = totalSec % 60;
+    return `${h}h ${m}m ${s}s`;
+  }
+
+
+function startRegen() {
+  // guard to avoid duplicate intervals
+  if (window.__hpRegenInterval) clearInterval(window.__hpRegenInterval);
+  if (window.__mpRegenInterval) clearInterval(window.__mpRegenInterval);
+
+  // HP: +1 per second
+  window.__hpRegenInterval = setInterval(() => {
+    if (typeof player === 'undefined') return;
+    if (player.hp < player.maxHp) {
+      player.hp = Math.min(player.maxHp, player.hp + 1);
+      updateUI();
+    }
+    // stop if game ended
+    if (checkEnd()) clearRegen();
+  }, 1000);
+
+  // Energy (mana): +1 per 0.2s
+  function setupMpRegenInterval() {
+    // clear prior
+    if (window.__mpRegenInterval) { clearInterval(window.__mpRegenInterval); window.__mpRegenInterval = null; }
+
+    const tickMs = 200;                      // base tick
+    const addPerTick = enraged ? 2 : 1;      // doubled when enraged
+
+    window.__mpRegenInterval = setInterval(() => {
+      if (typeof player === 'undefined') return;
+      if (player.energy < player.maxEnergy) {
+        player.energy = Math.min(player.maxEnergy, player.energy + addPerTick);
+        updateUI();
+      }
+      if (checkEnd()) clearRegen();
+    }, tickMs);
+  }
+
+  // call helper to establish the interval
+  setupMpRegenInterval();
+
+  // expose helper so we can reconfigure it when enraged toggles
+  window.__setupMpRegenInterval = setupMpRegenInterval;
+}
+
+function clearRegen() {
+  if (window.__hpRegenInterval) { clearInterval(window.__hpRegenInterval); window.__hpRegenInterval = null; }
+  if (window.__mpRegenInterval) { clearInterval(window.__mpRegenInterval); window.__mpRegenInterval = null; }
+}
+
+function flashHealthbar() {
+  const fill = document.querySelector('#player-bar .bar-fill');
+  const orig = window.getComputedStyle(fill).backgroundColor;
+  fill.style.backgroundColor = 'red';
+  setTimeout(() => (fill.style.backgroundColor = orig), 300);
+}
+
+// — helper to fade out audio (used later) —
+function fadeOutAudio(audio, duration = 2000, onComplete) {
+  const stepTime = 100;
+  const step = audio.volume / (duration / stepTime);
+  const fade = setInterval(() => {
+    if (audio.volume > step) {
+      audio.volume = Math.max(0, audio.volume - step);
+    } else {
+      clearInterval(fade);
+      audio.volume = 0;
+      if (onComplete) onComplete();
+    }
+  }, stepTime);
+}
+  </script>
+</body>
+</html>
