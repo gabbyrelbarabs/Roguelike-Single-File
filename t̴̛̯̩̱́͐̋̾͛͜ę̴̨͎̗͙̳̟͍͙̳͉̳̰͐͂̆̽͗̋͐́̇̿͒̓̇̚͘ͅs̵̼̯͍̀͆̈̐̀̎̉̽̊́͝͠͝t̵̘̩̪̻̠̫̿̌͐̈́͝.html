@@ -159,7 +159,7 @@
 /* Boss bar container expansion to 5x width over 38s */
 #boss-bar.boss-expand {
   transition: width 38s linear;
-  width: 1000px !important;
+  width: 1200px !important;
 }
 
 /* Make the boss bar fill use a smooth, very fast rainbow animation */
@@ -284,12 +284,12 @@
   
   const player = {
       maxHp: 100, hp: 100,
-      minDmg: 12000, maxDmg: 33000,
-      healMin: 150, healMax: 300,
+      minDmg: 4800, maxDmg: 13300,
+      healMin: 120, healMax: 330,
       maxEnergy: 100, energy: 100,
-      healCost: 40, attackCost: 0, magicCost: 30
+      healCost: 40, attackCost: 0, magicCost: 20
     };
-    const boss = { maxHp: 1000, hp: 1000, minDmg: 7, maxDmg: 13 };
+    const boss = { maxHp: 1000, hp: 1000, minDmg: 5, maxDmg: 14 };
 	boss.maxHp = boss.hp;
     let turn = 1;
 	let enrageTriggered = false;
@@ -299,6 +299,8 @@
 	
 	window.__hpRegenInterval = null;
 	window.__mpRegenInterval = null;
+	window.__bossAutoAttackTimer = window.__bossAutoAttackTimer || null;
+	window.__lastBossActionCall = window.__lastBossActionCall || 0;
 	
 	let randomLineAttackInterval = null;
 	let randomLineAttackRunning = false;
@@ -745,10 +747,12 @@ startJumpscareTicker();
 
     // set battle start time and begin systems
     battleStartTime = Date.now();
-    if (typeof log === 'function') log(Math.random() < 0.5 ? "The battle with the Previous Hero begins!" : "The Previous Hero challenges you!");
+    if (typeof log === 'function') log(Math.random() < 0.5 ? "The battle with " + bossDisplayName + " begins!" : bossDisplayName + " challenges you!");
     startRegen();
     if (typeof startTurn === 'function') startTurn();
     if (typeof setupSpecialIntervals === 'function') setupSpecialIntervals();
+	
+	startBossAutoAttack();
   }
 }
 
@@ -888,6 +892,7 @@ function checkEnd() {
       magBtn.disabled  = player.energy < player.magicCost;
       healBtn.disabled = player.energy < player.healCost;
 	  magBtn.disabled  = player.energy < player.magicCost || cooldowns.magic > 0;
+	  magBtn.textContent = magBtn.disabled ? 'Recharging...' : 'Magic';
 if (restBtn) {
     // If enraged: hide Rest (safer than removal)
     if (enraged) {
@@ -911,7 +916,7 @@ if (restBtn) {
       const rem = healCooldownRemainingSec();
       if (rem > 0) {
         healBtn.disabled = true;
-        healBtn.textContent = `Heal (${rem}s)`;
+        healBtn.textContent = `${rem}s`;
       } else if (cooldowns.heal > 0) {
         healBtn.disabled = true;
         healBtn.textContent = 'Recharging...';
@@ -925,7 +930,7 @@ if (restBtn) {
 	  if (idleTimeout) clearTimeout(idleTimeout);
 	  idleTimeout = setTimeout(() => {
 		bossAction();
-	  }, rand(800, 2500));
+	  }, rand(400, 1200));
 	  if (enraged) setupEnrageIntervals();
 	 }
 
@@ -946,6 +951,8 @@ if (restBtn) {
 		totalDamageDealt += dmg;
       }
       updateUI();
+	  
+	  setTimeout(startTurn, 100);
     });
 
     magBtn.addEventListener('click', () => {
@@ -971,6 +978,8 @@ if (restBtn) {
 		totalDamageDealt += dmg;
       }
       updateUI();
+	  
+	  setTimeout(startTurn, 100);
     });
 
     restBtn.addEventListener('click', () => {
@@ -985,6 +994,8 @@ if (restBtn) {
       player.energy = Math.min(player.maxEnergy, player.energy+eng);
       log('You rested and recover ' + eng + ' energy.');
       updateUI();
+	  
+	  setTimeout(startTurn, 100);
     });
 
 healBtn.addEventListener('click', () => {
@@ -1022,7 +1033,53 @@ healBtn.addEventListener('click', () => {
 
   // record last heal timestamp (start 30s cooldown)
   window.__lastHealTime = Date.now();
+  
+  setTimeout(startTurn, 800);
 });
+
+function startBossAutoAttack() {
+  if (window.__bossAutoAttackTimer) return; // already scheduled
+
+  const minDelay = 800;
+  const maxDelay = 2400;
+  const debounceMs = 600; // skip if last bossAction was within this many ms
+
+  function scheduleNext() {
+    // choose random delay (inclusive)
+    const delay = rand(minDelay, maxDelay);
+    window.__bossAutoAttackTimer = setTimeout(() => {
+      window.__bossAutoAttackTimer = null;
+
+      // safety: don't run if game ended
+      if (typeof checkEnd === 'function' && checkEnd()) return;
+
+      const now = Date.now();
+      if ((now - (window.__lastBossActionCall || 0)) >= debounceMs) {
+        try {
+          // call bossAction; record timestamp
+          if (typeof bossAction === 'function') {
+            bossAction();
+            window.__lastBossActionCall = Date.now();
+          }
+        } catch (e) {
+          // swallow errors — we don't want this to kill the loop
+          console.error('bossAutoAttack error', e);
+        }
+      }
+      // schedule the next tick regardless
+      scheduleNext();
+    }, delay);
+  }
+
+  scheduleNext();
+}
+
+function stopBossAutoAttack() {
+  if (window.__bossAutoAttackTimer) {
+    clearTimeout(window.__bossAutoAttackTimer);
+    window.__bossAutoAttackTimer = null;
+  }
+}
 
 	function bossAction() {
 	if (idleTimeout) clearTimeout(idleTimeout);
@@ -1107,7 +1164,8 @@ healBtn.addEventListener('click', () => {
 		}
       updateUI();
 	  turn++;
-      setTimeout(startTurn, 500);
+	  
+	  setTimeout(startTurn, 100);
 }
 
 let cx = 0, cy = 0, frozen = false;
@@ -2252,11 +2310,13 @@ function startRegen() {
 
     const tickMs = 200;                      // base tick
     const addPerTick = enraged ? 2 : 1;      // doubled when enraged
+	const addPerTk = enraged ? 2 : 1;
 
     window.__mpRegenInterval = setInterval(() => {
       if (typeof player === 'undefined') return;
       if (player.energy < player.maxEnergy) {
         player.energy = Math.min(player.maxEnergy, player.energy + addPerTick);
+		player.hp = Math.min(player.maxHp, player.hp + addPerTk);
         updateUI();
       }
       if (checkEnd()) clearRegen();
