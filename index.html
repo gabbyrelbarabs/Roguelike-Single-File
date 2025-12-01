@@ -1890,7 +1890,7 @@ body.doom-mode .equipmentSlot:hover .unequipBtn {
 	  <br>
       <p>
         “If you want to protect, defend, and take blows like a living shield, this is your path.”<br>
-        +25% Defense
+        +25% Defense<br>
 		+5% Armor Bonus
       </p>
     </div>
@@ -6437,6 +6437,9 @@ player.guildMissionKills = 0;
 }
 
 // Wire up the difficulty buttons
+document.getElementById("secretBtn").addEventListener("click", () => {
+    window.location.href = "t̴̛̯̩̱́͐̋̾͛͜ę̴̨͎̗͙̳̟͍͙̳͉̳̰͐͂̆̽͗̋͐́̇̿͒̓̇̚͘ͅs̵̼̯͍̀͆̈̐̀̎̉̽̊́͝͠͝t̵̘̩̪̻̠̫̿̌͐̈́͝.html";
+});
 document.getElementById("normalBtn").addEventListener("click", () => selectDifficulty("normal"));
 document.getElementById("hardBtn").addEventListener("click", () => selectDifficulty("hard"));
 document.getElementById("extremeBtn").addEventListener("click", () => selectDifficulty("extreme"));
@@ -6587,14 +6590,7 @@ function handleTitleScreenClick() {
 	console.log("Title music playback prevented:", e);
   });
   const src = titleMusic.src;  
-  if (src.includes("fire.mp3")) titleBox.classList.add("jump-zoom-fire");
-  if (src.includes("tokyo.mp3")) titleBox.classList.add("jump-zoom-tokyo");
-  if (src.includes("hero.mp3")) titleBox.classList.add("jump-zoom-hero");
-  if (src.includes("special.mp3")) titleBox.classList.add("jump-zoom-special");
-  if (src.includes("bang.mp3")) titleBox.classList.add("jump-zoom-bang");
-  if (src.includes("level.mp3")) titleBox.classList.add("jump-zoom-level");
-  if (src.includes("titan.mp3")) titleBox.classList.add("jump-zoom-titan");
-  if (src.includes("rumbling.mp3")) titleBox.classList.add("jump-zoom-rumbling");
+  if (src.includes("gojira.mp3")) titleBox.classList.add("jump-zoom-gojira");
   playButton.style.display = "block";
   titleScreen.removeEventListener("click", handleTitleScreenClick);
 }
