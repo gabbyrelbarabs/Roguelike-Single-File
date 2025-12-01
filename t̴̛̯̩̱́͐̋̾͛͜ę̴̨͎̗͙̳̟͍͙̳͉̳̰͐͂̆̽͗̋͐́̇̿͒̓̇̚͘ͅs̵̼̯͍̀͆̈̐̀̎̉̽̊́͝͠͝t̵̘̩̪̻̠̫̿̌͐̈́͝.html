@@ -1979,8 +1979,8 @@ function bossRotatingLaserAttack(onComplete) {
   const THICK_PX         = 120;
   const HALF_THICK       = THICK_PX / 12;
   const DOT_SIZE         = THICK_PX * 2;
-  const BLINK_INTERVAL   = 250;
-  const WARNING_DURATION = 670;
+  const BLINK_INTERVAL   = 10;
+  const WARNING_DURATION = 10;
   const DAMAGE_INTERVAL  = 10;
   const DAMAGE_PER_TICK  = 5;
   const START_SPEED      = 0.1;
@@ -2199,10 +2199,19 @@ function showJumpscare() {
   if (!window.__jumpscareShaking) {
     window.__jumpscareShaking = true;
     const shakeDuration = 2000; // ms (first 2s)
-    const magnitude = 16;        // px (smaller, but frequent — "very shaky")
+    const magnitude = 8;        // px (smaller, but frequent — "very shaky")
     const start = performance.now();
     const origBodyTransform = document.body.style.transform || '';
     const origBodyTransition = document.body.style.transition || '';
+
+    // Gather fixed-position elements and store their original transforms so we can
+    // apply inverse transforms per-frame to keep them visually anchored.
+    const fixedEls = Array.from(document.querySelectorAll('*')).filter(el => {
+      try { return window.getComputedStyle(el).position === 'fixed'; }
+      catch (e) { return false; }
+    });
+    const origTransforms = new Map();
+    fixedEls.forEach(el => origTransforms.set(el, el.style.transform || ''));
 
     function shakeFrame(now) {
       const elapsed = now - start;
@@ -2210,14 +2219,33 @@ function showJumpscare() {
         // small jitter (no rotation)
         const dx = (Math.random() - 0.5) * magnitude * 2;
         const dy = (Math.random() - 0.5) * magnitude * 2;
+
+        // Apply shake to body (so everything not fixed moves)
         document.body.style.transform = `translate(${dx}px, ${dy}px)`;
+
+        // Apply inverse to fixed elements so they stay visually put
+        fixedEls.forEach(el => {
+          const orig = origTransforms.get(el) || '';
+          // keep original transform and append inverse translate
+          el.style.transform = `${orig} translate(${-dx}px, ${-dy}px)`;
+        });
+
         requestAnimationFrame(shakeFrame);
       } else {
-        // smoothly restore body transform
+        // smoothly restore body transform & fixed elements
         document.body.style.transition = 'transform 200ms ease-out';
         document.body.style.transform = origBodyTransform;
+
+        fixedEls.forEach(el => {
+          // restore original transforms
+          el.style.transition = 'transform 200ms ease-out';
+          el.style.transform = origTransforms.get(el) || '';
+        });
+
         setTimeout(() => {
+          // clear transient transitions and mark not shaking
           document.body.style.transition = origBodyTransition;
+          fixedEls.forEach(el => { el.style.transition = ''; });
           window.__jumpscareShaking = false;
         }, 220);
       }
